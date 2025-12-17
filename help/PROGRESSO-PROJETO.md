@@ -19,7 +19,7 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 
 | Componente | Status | Progresso |
 |------------|--------|-----------|
-| Estrutura Base | ⬜ Não Iniciado | 0% |
+| Estrutura Base | 🟡 Em Progresso | 30% |
 | Sistema de Estado | ⬜ Não Iniciado | 0% |
 | Grafos de Decisão | ⬜ Não Iniciado | 0% |
 | Sistema de Combate | ⬜ Não Iniciado | 0% |
@@ -40,16 +40,16 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 ### 1. Estrutura Base do Projeto
 
 #### 1.1 Estrutura de Diretórios
-- [ ] Criar projeto .NET CLI (`dotnet new console`)
-- [ ] Criar estrutura `src/` com classes principais
-- [ ] Criar `Graphs/` para árvores de decisão (JSON ou C#)
-- [ ] Criar `help/` com documentação
-- [ ] Configurar `.csproj` e `Program.cs`
-- [ ] Configurar `.gitignore` apropriado para .NET
+- [x] Criar projeto .NET CLI (`dotnet new console`)
+- [x] Criar estrutura `src/` com classes principais
+- [x] Criar `Graphs/` para árvores de decisão (JSON ou C#)
+- [x] Configurar `.csproj` e `Program.cs`
+- [x] Configurar `.gitignore` apropriado para .NET
+- [x] Criar `README.md` inicial
 
 #### 1.2 Módulo Principal
-- [ ] Criar `Program.cs` (ponto de entrada)
-- [ ] Criar classe `WarVikingsBot` ou namespace principal
+- [x] Criar `Program.cs` (ponto de entrada)
+- [x] Criar estrutura básica do namespace principal
 - [ ] Implementar carregamento de grafos (JSON ou classes C#)
 - [ ] Implementar loop principal do jogo
 - [ ] Implementar gerenciamento de fases
@@ -336,8 +336,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [x] Assimilar projeto legado
 - [x] Assimilar regras de War Vikings
 - [x] Criar documento de progresso
-- [ ] Definir arquitetura detalhada
-- [ ] Criar estrutura base do projeto
+- [x] Definir arquitetura detalhada
+- [x] Criar estrutura base do projeto
 
 ### Fase 2: Core System
 - [ ] Implementar tipos de dados básicos
