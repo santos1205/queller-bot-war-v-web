@@ -11,7 +11,7 @@ Este documento rastreia o progresso da conversão do projeto **Queller Bot** (Wa
 
 ## 🎯 Objetivo do Projeto
 
-Criar um sistema CLI (Command Line Interface) em **Node.js** que implementa um bot de IA para jogar **War Vikings** solo, seguindo a mesma arquitetura do projeto Queller Bot original (mas adaptado para Node.js ao invés de Julia).
+Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um bot de IA para jogar **War Vikings** solo, seguindo a mesma arquitetura do projeto Queller Bot original (adaptado para .NET/C#).
 
 ---
 
@@ -40,26 +40,26 @@ Criar um sistema CLI (Command Line Interface) em **Node.js** que implementa um b
 ### 1. Estrutura Base do Projeto
 
 #### 1.1 Estrutura de Diretórios
-- [ ] Criar estrutura `src/` com módulos principais
-- [ ] Criar `graphs/` para árvores de decisão (JSON ou JS)
+- [ ] Criar projeto .NET CLI (`dotnet new console`)
+- [ ] Criar estrutura `src/` com classes principais
+- [ ] Criar `Graphs/` para árvores de decisão (JSON ou C#)
 - [ ] Criar `help/` com documentação
-- [ ] Configurar `package.json` e `package-lock.json`
-- [ ] Criar `index.js` ou `cli.js` (ponto de entrada)
-- [ ] Configurar `.gitignore` apropriado para Node.js
+- [ ] Configurar `.csproj` e `Program.cs`
+- [ ] Configurar `.gitignore` apropriado para .NET
 
 #### 1.2 Módulo Principal
-- [ ] Criar `src/warvikings.js` ou `src/index.js` (módulo principal)
-- [ ] Implementar carregamento de grafos (JSON ou módulos JS)
+- [ ] Criar `Program.cs` (ponto de entrada)
+- [ ] Criar classe `WarVikingsBot` ou namespace principal
+- [ ] Implementar carregamento de grafos (JSON ou classes C#)
 - [ ] Implementar loop principal do jogo
 - [ ] Implementar gerenciamento de fases
-- [ ] Configurar binário executável no `package.json`
 
 ---
 
 ### 2. Sistema de Estado (State Management)
 
 #### 2.1 Estado do Jogo
-- [ ] Criar `src/state.js` com classe `WarVikingsState` (equivalente a `QuellerState`)
+- [ ] Criar classe `WarVikingsState` (equivalente a `QuellerState`)
 - [ ] Implementar rastreamento de territórios
 - [ ] Implementar rastreamento de exércitos por território
 - [ ] Implementar rastreamento de regiões conquistadas
@@ -85,19 +85,18 @@ Criar um sistema CLI (Command Line Interface) em **Node.js** que implementa um b
 ### 3. Tipos de Dados e Enums
 
 #### 3.1 Componentes do Jogo
-- [ ] Criar `src/types.js` com constantes/enums
-- [ ] Criar `ArmyType` (Guerreiro, Emblema do Clã) - usar constantes ou enum
-- [ ] Criar `TerritoryType` (com/sem porto) - usar constantes ou enum
-- [ ] Criar `RegionType` (regiões do tabuleiro) - usar constantes ou enum
-- [ ] Criar `GodType` (Odin, Thor, Loki, etc.) - usar constantes ou enum
-- [ ] Criar `CommandEffectType` (4 tipos) - usar constantes ou enum
+- [ ] Criar enum `ArmyType` (Guerreiro, EmblemaDoCla)
+- [ ] Criar enum `TerritoryType` (ComPorto, SemPorto)
+- [ ] Criar enum `RegionType` (regiões do tabuleiro)
+- [ ] Criar enum `GodType` (Odin, Thor, Loki, etc.)
+- [ ] Criar enum `CommandEffectType` (GritoDeBatalha, AguasSangrentas, ParedeDeEscudos, PreceDaGuerra)
 - [ ] Criar classe `Territory` (nome, tipo, porto, ocupação)
 - [ ] Criar classe `Army` (tipo, quantidade, localização)
 - [ ] Criar classe `Ship` (localização, porto)
 
 #### 3.2 Sistema de Combate
-- [ ] Criar enum `DiceColor` (Vermelho/Atacante, Amarelo/Defensor)
-- [ ] Criar estrutura `CombatResult` (rolagens, comparações, perdas)
+- [ ] Criar enum `DiceColor` (Vermelho, Amarelo)
+- [ ] Criar classe `CombatResult` (rolagens, comparações, perdas)
 - [ ] Implementar lógica de rolagem de dados (máx 3 dados por lado)
 
 ---
@@ -105,10 +104,11 @@ Criar um sistema CLI (Command Line Interface) em **Node.js** que implementa um b
 ### 4. Grafos de Decisão (Árvores de Decisão)
 
 #### 4.1 Estrutura Base dos Grafos
-- [ ] Criar `src/graph.js` com classes de nós para War Vikings
-- [ ] Manter tipos de nós: `Start`, `End`, `PerformAction`, `BinaryCondition`, `MultipleChoice`, `JumpToGraph`
+- [ ] Criar classes base de nós (`Node`, `StartNode`, `EndNode`, etc.)
+- [ ] Criar classes de nós: `PerformActionNode`, `BinaryConditionNode`, `MultipleChoiceNode`, `JumpToGraphNode`
+- [ ] Decidir formato de grafos (JSON ou classes C#)
+- [ ] Criar sistema de carregamento de grafos
 - [ ] Criar novos tipos de nós específicos se necessário
-- [ ] Decidir formato de grafos (JSON ou módulos JS)
 
 #### 4.2 Fases do Turno
 - [ ] **Fase 1: Recebimento de Exércitos**
@@ -138,31 +138,31 @@ Criar um sistema CLI (Command Line Interface) em **Node.js** que implementa um b
   - [ ] Verificar se acumulou 5+ cartas (forçar troca)
 
 #### 4.3 Sub-grafos Especializados
-- [ ] **combate.js** ou **combate.json** - Resolução de combate terrestre
+- [ ] **CombatGraph.cs** ou **combat.json** - Resolução de combate terrestre
   - [ ] Rolagem de dados (vermelhos vs amarelos)
   - [ ] Comparação de resultados (maior com maior, etc.)
   - [ ] Aplicação de perdas
   - [ ] Decisão de enviar para Valhalla ou reserva
 
-- [ ] **combate-naval.js** ou **combate-naval.json** - Resolução de combate naval
+- [ ] **NavalCombatGraph.cs** ou **combate-naval.json** - Resolução de combate naval
   - [ ] Verificação de navios em portos
   - [ ] Combate entre navios (3 dados cada)
   - [ ] Destruição de navios (3 vitórias)
   - [ ] Ataque terrestre após vitória naval
 
-- [ ] **valhalla.js** ou **valhalla.json** - Gerenciamento do Valhalla
+- [ ] **ValhallaGraph.cs** ou **valhalla.json** - Gerenciamento do Valhalla
   - [ ] Envio de exércitos derrotados para Valhalla
   - [ ] Verificação de limite (máx 6 exércitos)
   - [ ] Sacrifício de exércitos para poderes dos deuses
   - [ ] Construção de navios (sacrificar 1 exército)
 
-- [ ] **poderes-deuses.js** ou **poderes-deuses.json** - Invocação de poderes
+- [ ] **GodPowersGraph.cs** ou **poderes-deuses.json** - Invocação de poderes
   - [ ] Seleção de deus
   - [ ] Anúncio de sacrifício
   - [ ] Aplicação de efeito na rolagem
   - [ ] Segunda rolagem (se necessário)
 
-- [ ] **troca-cartas.js** ou **troca-cartas.json** - Sistema de troca de cartas
+- [ ] **CardTradeGraph.cs** ou **troca-cartas.json** - Sistema de troca de cartas
   - [ ] Verificação de 3 cartas iguais
   - [ ] Verificação de 3 cartas diferentes
   - [ ] Cálculo de exércitos progressivos (4, 6, 8, 10...)
@@ -200,11 +200,11 @@ Criar um sistema CLI (Command Line Interface) em **Node.js** que implementa um b
 ### 6. Interface CLI (Command Line Interface)
 
 #### 6.1 Adaptação do CLI
-- [ ] Criar `src/cli.js` para War Vikings
-- [ ] Usar biblioteca de CLI (ex: `readline`, `inquirer`, ou `commander`)
+- [ ] Criar classe `CliInterface` ou usar `System.Console`
+- [ ] Usar biblioteca CLI (ex: `System.CommandLine` ou `Spectre.Console`)
 - [ ] Atualizar mensagens de boas-vindas
 - [ ] Atualizar mensagens de ajuda
-- [ ] Adaptar comandos especiais (help, undo, exit, reset, phase)
+- [ ] Implementar comandos especiais (help, undo, exit, reset, phase)
 
 #### 6.2 Inputs Específicos
 - [ ] Criar input para seleção de territórios
@@ -254,7 +254,7 @@ Criar um sistema CLI (Command Line Interface) em **Node.js** que implementa um b
 ### 8. Sistema de Navegação (GraphCrawler)
 
 #### 8.1 Adaptação do Crawler
-- [ ] Criar `src/crawler.js` para War Vikings
+- [ ] Criar classe `GraphCrawler` para War Vikings
 - [ ] Manter sistema de auto-navegação
 - [ ] Manter sistema de undo
 - [ ] Adaptar para novos tipos de estado
@@ -295,6 +295,7 @@ Criar um sistema CLI (Command Line Interface) em **Node.js** que implementa um b
 ### 10. Testes e Validação
 
 #### 10.1 Testes Unitários
+- [ ] Configurar framework de testes (xUnit, NUnit ou MSTest)
 - [ ] Testar sistema de combate
 - [ ] Testar cálculo de exércitos
 - [ ] Testar sistema de Valhalla
@@ -373,9 +374,9 @@ Criar um sistema CLI (Command Line Interface) em **Node.js** que implementa um b
 
 ### Decisões de Design
 - Manter arquitetura similar ao Queller Bot para facilitar manutenção
-- Usar **Node.js** como plataforma (JavaScript/TypeScript)
+- Usar **.NET (C#)** como plataforma (CLI application)
 - Manter sistema de grafos de decisão (proven eficaz)
-- Usar CommonJS ou ES Modules conforme necessidade
+- Usar JSON ou classes C# para definir grafos (a decidir)
 
 ### Considerações Especiais
 - War Vikings tem mecânicas diferentes de War of the Ring
@@ -389,14 +390,14 @@ Criar um sistema CLI (Command Line Interface) em **Node.js** que implementa um b
 - Manual original: `projeto-legado/manual regras do jogo.txt`
 
 ### Tecnologias Utilizadas
-- **Plataforma:** Node.js (versão LTS recomendada)
-- **Linguagem:** JavaScript (ou TypeScript, se preferir tipagem)
+- **Plataforma:** .NET (versão 8.0+ recomendada)
+- **Linguagem:** C#
 - **Dependências Potenciais:**
-  - `readline` ou `inquirer` - Interface CLI interativa
-  - `commander` ou `yargs` - Parsing de argumentos CLI (opcional)
-  - `chalk` ou `colors` - Formatação de texto colorido no terminal (opcional)
+  - `System.CommandLine` - Interface CLI moderna (opcional)
+  - `Spectre.Console` - Interface CLI rica com cores e tabelas (opcional)
+  - `Newtonsoft.Json` ou `System.Text.Json` - Parsing de grafos JSON (se usar JSON)
 - **Paradigma:** Programação baseada em grafos de decisão
-- **Estrutura:** Módulos CommonJS ou ES Modules
+- **Estrutura:** Classes C# e/ou arquivos JSON
 
 ---
 
@@ -411,20 +412,20 @@ Criar um sistema CLI (Command Line Interface) em **Node.js** que implementa um b
 
 ## ✅ Checklist Rápido
 
-- [ ] Estrutura base criada (Node.js)
-- [ ] `package.json` configurado
-- [ ] Tipos de dados definidos (`src/types.js`)
-- [ ] Sistema de estado implementado (`src/state.js`)
-- [ ] Motor de grafos implementado (`src/graph.js`)
-- [ ] GraphCrawler implementado (`src/crawler.js`)
+- [ ] Estrutura base criada (.NET project)
+- [ ] `.csproj` configurado
+- [ ] Tipos de dados definidos (enums e classes)
+- [ ] Sistema de estado implementado (`WarVikingsState`)
+- [ ] Motor de grafos implementado (`Graph`, `Node`, etc.)
+- [ ] GraphCrawler implementado
 - [ ] Primeiro grafo funcionando
-- [ ] Sistema de combate implementado (`src/combat.js`)
-- [ ] CLI adaptado (`src/cli.js`)
+- [ ] Sistema de combate implementado
+- [ ] CLI adaptado (`CliInterface` ou `System.CommandLine`)
 - [ ] Todas as fases do turno implementadas
 - [ ] Mecânicas especiais implementadas
 - [ ] Documentação completa
-- [ ] Testes realizados (Jest ou Mocha)
-- [ ] Projeto pronto para uso (`npm install` e `npm start`)
+- [ ] Testes realizados (xUnit ou NUnit)
+- [ ] Projeto pronto para uso (`dotnet run` ou executável)
 
 ---
 
