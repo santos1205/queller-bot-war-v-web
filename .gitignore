@@ -1,0 +1,10 @@
+*.swp
+*.ps
+*.pdf
+*.gv
+
+QuellerCLI
+
+projeto-legado/
+
+
