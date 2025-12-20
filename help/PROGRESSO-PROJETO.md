@@ -1,5 +1,7 @@
 # PROGRESSO DO PROJETO: War Vikings Bot
 
+[↑ Voltar ao topo](#progresso-do-projeto-war-vikings-bot)
+
 ## 📋 Visão Geral
 
 Este documento rastreia o progresso da conversão do projeto **Queller Bot** (War of the Ring) para **War Vikings Bot**, um sistema de IA para jogar War Vikings solo.
@@ -54,6 +56,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Implementar loop principal do jogo
 - [ ] Implementar gerenciamento de fases
 
+[↑ Voltar ao topo](#-visão-geral)
+
 ---
 
 ### 2. Sistema de Estado (State Management)
@@ -80,6 +84,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Implementar sistema de sacrifício de exércitos do Valhalla
 - [ ] Implementar invocação de poderes (antes da rolagem)
 
+[↑ Voltar ao topo](#-visão-geral)
+
 ---
 
 ### 3. Tipos de Dados e Enums
@@ -98,6 +104,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [x] Criar enum `DiceColor` (Vermelho, Amarelo)
 - [x] Criar classe `CombatResult` (rolagens, comparações, perdas)
 - [ ] Implementar lógica de rolagem de dados (máx 3 dados por lado)
+
+[↑ Voltar ao topo](#-visão-geral)
 
 ---
 
@@ -168,6 +176,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
   - [ ] Cálculo de exércitos progressivos (4, 6, 8, 10...)
   - [ ] Forçar troca se 5+ cartas
 
+[↑ Voltar ao topo](#-visão-geral)
+
 ---
 
 ### 5. Sistema de Combate
@@ -194,6 +204,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Implementar Águas Sangrentas (rerrolar em combate naval)
 - [ ] Implementar Parede de Escudos (rerrolar 1 dado de defesa)
 - [ ] Implementar Prece da Guerra (ignorar carta, embaralhar, comprar nova)
+
+[↑ Voltar ao topo](#-visão-geral)
 
 ---
 
@@ -222,6 +234,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Mostrar cartas de território
 - [ ] Mostrar objetivo (se revelado)
 
+[↑ Voltar ao topo](#-visão-geral)
+
 ---
 
 ### 7. Mecânicas Especiais
@@ -249,6 +263,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Implementar proibição de ataque na primeira rodada
 - [ ] Implementar apenas posicionamento de exércitos
 
+[↑ Voltar ao topo](#-visão-geral)
+
 ---
 
 ### 8. Sistema de Navegação (GraphCrawler)
@@ -266,6 +282,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Criar nós para verificação de regiões
 - [ ] Criar nós para verificação de Valhalla
 - [ ] Criar nós para verificação de navios
+
+[↑ Voltar ao topo](#-visão-geral)
 
 ---
 
@@ -290,6 +308,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Definir termos técnicos do jogo
 - [ ] Definir termos do bot
 
+[↑ Voltar ao topo](#-visão-geral)
+
 ---
 
 ### 10. Testes e Validação
@@ -313,6 +333,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Validar lógica de decisão do bot
 - [ ] Validar prioridades de ação
 
+[↑ Voltar ao topo](#-visão-geral)
+
 ---
 
 ## 🚧 Bloqueadores e Dependências
@@ -327,6 +349,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 4. **Grafos de Decisão** → Dependem de estado e tipos
 5. **Sistema de Combate** → Pode ser desenvolvido em paralelo
 6. **CLI** → Depende de grafos e estado
+
+[↑ Voltar ao topo](#-visão-geral)
 
 ---
 
@@ -367,6 +391,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Testes de integração
 - [ ] Validação de regras
 - [ ] Ajustes finais
+
+[↑ Voltar ao topo](#-visão-geral)
 
 ---
 
@@ -426,6 +452,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - Documentar decisões de design
 - Validar implementação contra as regras do jogo
 
+[↑ Voltar ao topo](#-visão-geral)
+
 ### Referências
 - Projeto legado: `projeto-legado/` (Julia - referência arquitetural)
 - Regras do jogo: `help/regras.md`
@@ -441,6 +469,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - **Paradigma:** Programação baseada em grafos de decisão
 - **Estrutura:** Classes C# e/ou arquivos JSON
 
+[↑ Voltar ao topo](#-visão-geral)
+
 ---
 
 ## 🔄 Histórico de Atualizações
@@ -449,6 +479,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - **Data:** [Data atual]
 - **Ação:** Criação do documento de progresso
 - **Status:** Planejamento inicial completo
+
+[↑ Voltar ao topo](#-visão-geral)
 
 ---
 
@@ -468,6 +500,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Documentação completa
 - [ ] Testes realizados (xUnit ou NUnit)
 - [ ] Projeto pronto para uso (`dotnet run` ou executável)
+
+[↑ Voltar ao topo](#-visão-geral)
 
 ---
 

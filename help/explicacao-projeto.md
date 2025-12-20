@@ -1,5 +1,7 @@
 # Explicação do Projeto: War Vikings Bot
 
+[↑ Voltar ao topo](#explicação-do-projeto-war-vikings-bot)
+
 Este documento contém explicações detalhadas de cada componente implementado no projeto, incluindo:
 - O que foi implementado
 - Como funciona (lógica do código)
@@ -53,6 +55,8 @@ O projeto foi criado usando `dotnet new console`, configurado para .NET 8.0 (ver
 ### Regras implementadas
 
 Nenhuma regra específica do jogo foi implementada nesta etapa. Esta é a base estrutural que permite a implementação das regras do jogo nas etapas seguintes.
+
+[↑ Voltar ao topo](#-índice)
 
 ---
 
@@ -173,6 +177,8 @@ Os enums usam valores numéricos quando faz sentido (`ArmyType` usa 1 e 5 para r
 
 **Regra: Empate no Combate** (regras.md, linha 53)
 > "A vitória é definida por quem tiver mais pontos no dado, e em caso de empate, a vitória é da defesa"
+
+[↑ Voltar ao topo](#-índice)
 
 ---
 
@@ -333,6 +339,8 @@ Verifica se o comandante do jogador está no território especificado.
 | Efeito de comando (comandante presente) | `CanUseCommandEffect()` | ✅ |
 | Primeira rodada (sem ataques) | `IsFirstRound` | ✅ |
 
+[↑ Voltar ao topo](#-índice)
+
 ---
 
 ## 4. Classes Base de Grafos de Decisão
@@ -476,6 +484,8 @@ Este sistema não implementa regras específicas do jogo diretamente. Ele fornec
 | `MultipleChoiceNode` | Múltiplas opções | Interativo |
 | `JumpToGraphNode` | Salto para outro grafo | Não interativo |
 | `Graph` | Grafo completo | Container |
+
+[↑ Voltar ao topo](#-índice)
 
 ---
 
@@ -783,6 +793,8 @@ Este componente não implementa regras específicas do jogo diretamente. Ele imp
 | Salto entre grafos | `HandleJump()` | Chama outro grafo como sub-rotina |
 | Retorno de grafos | `HandleReturn()` | Retorna de grafo chamado |
 | Acumulação de mensagens | `AddToMessageBuffer()` | Coleta mensagens para exibição |
+
+[↑ Voltar ao topo](#-índice)
 
 ---
 
