@@ -2,9 +2,6 @@
 
 namespace WarVikingsBot
 {
-    /// <summary>
-    /// War Vikings Bot - Sistema CLI para jogar War Vikings solo
-    /// </summary>
     class Program
     {
         static void Main(string[] args)
@@ -24,8 +21,7 @@ namespace WarVikingsBot
             // TODO: Implementar carregamento de grafos
             // TODO: Implementar gerenciamento de fases
             
-            Console.WriteLine("Pressione qualquer tecla para sair...");
-            Console.ReadKey();
+            Console.WriteLine("Programa inicializado com sucesso!");
         }
     }
 }
