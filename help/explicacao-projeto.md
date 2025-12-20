@@ -1,0 +1,491 @@
+# Explicação do Projeto: War Vikings Bot
+
+Este documento contém explicações detalhadas de cada componente implementado no projeto, incluindo:
+- O que foi implementado
+- Como funciona (lógica do código)
+- Qual regra do jogo foi implementada
+
+---
+
+## 📋 Índice
+
+1. [Estrutura Base do Projeto](#1-estrutura-base-do-projeto)
+2. [Tipos de Dados Básicos](#2-tipos-de-dados-básicos)
+3. [Sistema de Estado (WarVikingsState)](#3-sistema-de-estado-warvikingsstate)
+4. [Classes Base de Grafos de Decisão](#4-classes-base-de-grafos-de-decisão)
+
+---
+
+## 1. Estrutura Base do Projeto
+
+### O que foi implementado
+
+Criação da estrutura inicial do projeto .NET 8.0, incluindo:
+- Projeto console application
+- Estrutura de diretórios organizada
+- Arquivos de configuração básicos
+
+### Estrutura de Diretórios
+
+```
+WarVikingsBot/
+├── src/
+│   ├── Models/      # Modelos de dados (enums, classes)
+│   ├── Graphs/      # Classes de grafos de decisão
+│   ├── State/       # Gerenciamento de estado do jogo
+│   ├── Cli/         # Interface de linha de comando
+│   └── Crawler/     # Navegador de grafos
+├── Graphs/          # Definições de grafos (JSON ou C#)
+├── Program.cs       # Ponto de entrada
+└── WarVikingsBot.csproj
+```
+
+### Lógica do código
+
+O projeto foi criado usando `dotnet new console`, configurado para .NET 8.0 (versão LTS estável). A estrutura de diretórios foi organizada para separar responsabilidades:
+- **Models**: Define os tipos de dados do jogo
+- **Graphs**: Implementa o sistema de grafos de decisão
+- **State**: Gerencia o estado do jogo durante a partida
+- **Cli**: Interface com o usuário
+- **Crawler**: Navega pelos grafos automaticamente
+
+### Regras implementadas
+
+Nenhuma regra específica do jogo foi implementada nesta etapa. Esta é a base estrutural que permite a implementação das regras do jogo nas etapas seguintes.
+
+---
+
+## 2. Tipos de Dados Básicos
+
+### O que foi implementado
+
+Criação dos enums e classes fundamentais que representam os componentes do jogo War Vikings.
+
+### Enums criados
+
+#### `ArmyType`
+```csharp
+public enum ArmyType
+{
+    Guerreiro = 1,        // Representa 1 exército
+    EmblemaDoCla = 5      // Representa 5 exércitos
+}
+```
+
+#### `CommandEffectType`
+```csharp
+public enum CommandEffectType
+{
+    GritoDeBatalha,       // Rerrolar 1 dado de ataque
+    AguasSangrentas,      // Rerrolar em combate naval
+    ParedeDeEscudos,      // Rerrolar 1 dado de defesa
+    PreceDaGuerra         // Ignorar carta, embaralhar, comprar nova
+}
+```
+
+#### `DiceColor`
+```csharp
+public enum DiceColor
+{
+    Vermelho,    // Dados do atacante
+    Amarelo      // Dados do defensor
+}
+```
+
+#### `TerritoryType`
+```csharp
+public enum TerritoryType
+{
+    ComPorto,    // Território com porto (ícone de barco)
+    SemPorto     // Território sem porto
+}
+```
+
+#### `GodType`
+```csharp
+public enum GodType
+{
+    Odin,    // Pai dos deuses
+    Thor,    // Deus do trovão
+    Loki,    // Deus da trapaça
+    Freyja   // Deusa do amor e da guerra
+}
+```
+
+### Classes criadas
+
+#### `Territory`
+Representa um território no tabuleiro com:
+- Nome, tipo (com/sem porto), ocupação, exércitos
+- Região à qual pertence
+- Territórios adjacentes
+- Propriedades auxiliares (`IsOccupied`, `CanAttack`, `HasPort`)
+
+#### `Army`
+Representa um exército com:
+- Tipo (Guerreiro ou Emblema do Clã)
+- Valor (quantidade de exércitos que representa)
+- Localização (território)
+- Jogador dono
+
+#### `Ship`
+Representa um navio de guerra (Hersekskip) com:
+- ID, localização (território com porto)
+- Jogador dono
+- Estado (em combate, destruído)
+
+#### `CombatResult`
+Representa o resultado de um combate com:
+- Rolagens de dados (vermelhos e amarelos)
+- Comparações realizadas
+- Perdas de exércitos
+- Indicação de conquista de território
+
+#### `DiceComparison`
+Representa uma comparação individual entre dois dados:
+- Valores do atacante e defensor
+- Indicação de quem venceu (empate = vitória do defensor)
+
+### Lógica do código
+
+Os enums usam valores numéricos quando faz sentido (`ArmyType` usa 1 e 5 para representar o valor do exército). As classes usam propriedades auto-implementadas e propriedades calculadas (`HasPort`, `IsOccupied`, `CanAttack`) para facilitar o acesso a informações derivadas.
+
+### Regras implementadas
+
+**Regra: Tipos de Exércitos** (regras.md, linha 22)
+> "O **Guerreiro** representa 1 exército. O **Emblema do Clã** representa 5 exércitos."
+
+**Regra: Efeitos de Comando** (regras.md, linha 27)
+> "Quatro efeitos diferentes influenciam a partida; um é sorteado no início."
+
+**Regra: Dados de Combate** (regras.md, linha 30)
+> "**Dados vermelhos** são usados pelo atacante, e **dados amarelos** pelo defensor."
+
+**Regra: Territórios com Portos** (regras.md, linha 25)
+> "Alguns territórios possuem **portos** (ícone de barco)."
+
+**Regra: Deuses** (regras.md, linha 28)
+> "Cartas de Poder dos Deuses - 12 (3 por deus)"
+
+**Regra: Navios de Guerra** (regras.md, linha 24)
+> "Navios de Guerra (Hersekskip) - 5 por jogador"
+
+**Regra: Empate no Combate** (regras.md, linha 53)
+> "A vitória é definida por quem tiver mais pontos no dado, e em caso de empate, a vitória é da defesa"
+
+---
+
+## 3. Sistema de Estado (WarVikingsState)
+
+### O que foi implementado
+
+A classe `WarVikingsState` gerencia todo o estado do jogo durante uma partida. Ela armazena e fornece acesso a todas as informações necessárias para o bot tomar decisões.
+
+### Estrutura de Dados
+
+#### Propriedades Principais
+
+```csharp
+public Dictionary<string, Territory> Territories { get; set; }
+```
+- Armazena todos os territórios do tabuleiro
+- Chave: nome do território
+- Valor: objeto `Territory` completo
+
+```csharp
+public Dictionary<int, List<Army>> PlayerArmies { get; set; }
+```
+- Armazena exércitos por jogador
+- Chave: ID do jogador
+- Valor: lista de exércitos do jogador
+
+```csharp
+public Dictionary<int, int> ValhallaArmies { get; set; }
+```
+- Armazena quantidade de exércitos no Valhalla por jogador
+- Chave: ID do jogador
+- Valor: quantidade (máximo 6)
+
+```csharp
+public Dictionary<int, List<Ship>> PlayerShips { get; set; }
+```
+- Armazena navios por jogador
+- Chave: ID do jogador
+- Valor: lista de navios (máximo 5)
+
+```csharp
+public Dictionary<int, string> CommanderLocation { get; set; }
+```
+- Armazena localização do comandante por jogador
+- Chave: ID do jogador
+- Valor: nome do território onde está o comandante
+
+```csharp
+public Dictionary<int, List<string>> TerritoryCards { get; set; }
+```
+- Armazena cartas de território por jogador
+- Chave: ID do jogador
+- Valor: lista de nomes de cartas
+
+```csharp
+public Dictionary<int, string> ObjectiveCards { get; set; }
+```
+- Armazena carta-objetivo de cada jogador (mantida em segredo)
+
+```csharp
+public CommandEffectType ActiveCommandEffect { get; set; }
+```
+- Armazena o efeito de comando sorteado no início
+- Válido para todos os comandantes
+
+### Métodos Auxiliares Implementados
+
+#### `CalculateArmiesFromTerritories(int playerId)`
+
+**Lógica:**
+```csharp
+var territoryCount = GetPlayerTerritoryCount(playerId);
+var armies = territoryCount / 2;
+return territoryCount < 6 ? Math.Max(armies, 3) : armies;
+```
+
+1. Conta quantos territórios o jogador possui
+2. Divide por 2 (arredondado para baixo)
+3. Se tem menos de 6 territórios, retorna no mínimo 3
+4. Se tem 6 ou mais, retorna exatamente `territórios / 2`
+
+**Regra implementada:** (regras.md, linha 46)
+> "Soma-se o número de territórios possuídos e divide-se por 2 (o resultado é arredondado para baixo). O mínimo de exércitos a receber é 3, a não ser que o jogador possua menos de 6 territórios."
+
+#### `MustTradeCards(int playerId)`
+
+**Lógica:**
+```csharp
+return GetTerritoryCardCount(playerId) >= 5;
+```
+
+Retorna `true` se o jogador tem 5 ou mais cartas, forçando a troca obrigatória.
+
+**Regra implementada:** (regras.md, linha 48)
+> "É obrigatório trocar se o jogador acumular 5 cartas."
+
+#### `GetAttackableTerritories(int playerId)`
+
+**Lógica:**
+1. Obtém todos os territórios do jogador
+2. Para cada território, verifica se pode atacar (pelo menos 2 exércitos)
+3. Para cada território adjacente, verifica se está ocupado por outro jogador
+4. Adiciona à lista de territórios atacáveis
+
+**Regra implementada:** (regras.md, linha 51)
+> "O ataque é anunciado contra um território inimigo contíguo, desde que o atacante tenha no mínimo 2 exércitos no território de origem (sendo 1 o exército de ocupação, que não ataca)."
+
+#### `CanAddToValhalla(int playerId)`
+
+**Lógica:**
+```csharp
+return GetValhallaArmyCount(playerId) < 6;
+```
+
+Retorna `true` apenas se o jogador tem menos de 6 exércitos no Valhalla.
+
+**Regra implementada:** (regras.md, linha 26)
+> "O máximo de exércitos que um jogador pode ter no Valhalla é seis."
+
+#### `CanBuildShip(int playerId)`
+
+**Lógica:**
+```csharp
+return GetValhallaArmyCount(playerId) >= 1 && 
+       GetPlayerShipCount(playerId) < 5;
+```
+
+Requer:
+- Pelo menos 1 exército no Valhalla (para sacrificar)
+- Menos de 5 navios (limite máximo)
+
+**Regra implementada:** (regras.md, linha 115)
+> "Uma embarcação é construída sacrificando 1 exército do Valhalla"
+> "Cada jogador tem 5 navios em sua reserva"
+
+#### `CanUseCommandEffect(int playerId, string territoryName)`
+
+**Lógica:**
+```csharp
+return HasCommanderInTerritory(playerId, territoryName);
+```
+
+Verifica se o comandante do jogador está no território especificado.
+
+**Regra implementada:** (regras.md, linha 91)
+> "Os Efeitos de Comando são utilizados exclusivamente em combates que envolvam territórios onde o Comandante do jogador está presente."
+
+### Resumo das Regras Implementadas
+
+| Regra | Método | Status |
+|-------|--------|--------|
+| Cálculo de exércitos por territórios (÷2, min 3) | `CalculateArmiesFromTerritories()` | ✅ |
+| Troca obrigatória com 5+ cartas | `MustTradeCards()` | ✅ |
+| Territórios atacáveis (contíguos, min 2 exércitos) | `GetAttackableTerritories()` | ✅ |
+| Limite de Valhalla (máx 6) | `CanAddToValhalla()` | ✅ |
+| Construção de navios (1 exército Valhalla, máx 5 navios) | `CanBuildShip()` | ✅ |
+| Efeito de comando (comandante presente) | `CanUseCommandEffect()` | ✅ |
+| Primeira rodada (sem ataques) | `IsFirstRound` | ✅ |
+
+---
+
+## 4. Classes Base de Grafos de Decisão
+
+### O que foi implementado
+
+Sistema completo de grafos de decisão que permite representar árvores de decisão que o bot seguirá durante o jogo. Este sistema é o coração da arquitetura do bot, permitindo definir fluxos de decisão complexos de forma estruturada.
+
+### Hierarquia de Classes
+
+```
+Node (abstrata)
+├── NonInteractiveNode (abstrata)
+│   ├── StartNode
+│   ├── EndNode
+│   ├── JumpToGraphNode
+│   └── ReturnFromGraphNode
+└── InteractiveNode (abstrata)
+    ├── PerformActionNode
+    ├── BinaryConditionNode
+    └── MultipleChoiceNode
+```
+
+### Tipos de Nós Implementados
+
+#### `Node` (Classe Base)
+- Define propriedade `Id` para identificação única
+- Método estático `IsValidId()` valida formato de IDs
+- IDs devem começar com letra minúscula e conter apenas letras minúsculas, dígitos e underscore
+
+#### `StartNode`
+- Ponto de entrada de cada grafo
+- Não requer interação do usuário
+- Sempre avança automaticamente para o próximo nó
+
+#### `EndNode`
+- Ponto de saída do grafo
+- Não tem próximo nó (`GetNext()` retorna `null`)
+- Pode exibir mensagem final
+
+#### `PerformActionNode`
+- Exibe uma ação que o jogador deve executar
+- Opção única: pressionar Enter (string vazia)
+- Sempre avança para o próximo nó após confirmação
+
+**Exemplo de uso:**
+```
+"Recupere seus dados de ação."
+[Pressione Enter para continuar]
+```
+
+#### `BinaryConditionNode`
+- Exibe uma pergunta sim/não
+- Aceita "true"/"t" ou "false"/"f"
+- Encaminha para `TrueNode` ou `FalseNode` conforme resposta
+
+**Exemplo de uso:**
+```
+"Você tem mais de 6 cartas?"
+[true/false] > true
+→ Vai para nó de descarte de cartas
+```
+
+#### `MultipleChoiceNode`
+- Exibe pergunta com múltiplas opções
+- Gera opções numeradas (1, 2, 3, ...)
+- Retorna nó correspondente ao índice escolhido
+
+**Exemplo de uso:**
+```
+"Qual território atacar?"
+1. Território A
+2. Território B
+3. Território C
+[1/2/3] > 2
+→ Vai para nó de ataque ao Território B
+```
+
+#### `JumpToGraphNode`
+- Permite chamar outro grafo como sub-rotina
+- `TargetGraphId` identifica o grafo destino
+- `Next` é o nó para retornar após sub-grafo terminar
+- Útil para modularizar lógica (ex: combate, troca de cartas)
+
+**Exemplo de uso:**
+```
+Grafo principal: "phase_2"
+  → JumpToGraphNode("combate")  // Chama grafo de combate
+  → Após combate, retorna para Next
+```
+
+#### `ReturnFromGraphNode`
+- Marca o retorno de um grafo chamado
+- Usado em conjunto com `JumpToGraphNode`
+
+### Classe `Graph`
+
+Representa um grafo completo com:
+- `Id`: Identificador único do grafo
+- `RootNode`: Ponto de entrada (`StartNode`)
+- `AllNodes`: Lista de todos os nós do grafo
+- `GetNodeById()`: Busca nó por ID
+- `GetJumpTargets()`: Lista grafos referenciados por saltos
+
+### Lógica do código
+
+O sistema funciona como um fluxograma:
+1. Começa no `StartNode` (raiz)
+2. Navega automaticamente por nós não-interativos
+3. Para em nós interativos para aguardar resposta do usuário
+4. Baseado na resposta, segue para próximo nó
+5. Continua até chegar em um `EndNode`
+
+**Fluxo de navegação:**
+```
+StartNode → PerformActionNode → BinaryConditionNode
+                                    ├─ true → NodeA
+                                    └─ false → NodeB
+```
+
+### Regras implementadas
+
+Este sistema não implementa regras específicas do jogo diretamente. Ele fornece a **estrutura** para representar as decisões do bot.
+
+**Conceito:** O sistema permite criar fluxogramas que representam a lógica de decisão do bot, seguindo o mesmo padrão do projeto Queller Bot original.
+
+**Uso no jogo:**
+- Cada fase do turno será um grafo separado
+- Sub-grafos especializados para combate, troca de cartas, etc.
+- Permite modularização e reutilização de lógica
+
+### Resumo
+
+| Componente | Função | Tipo |
+|------------|--------|------|
+| `Node` | Classe base | Abstrata |
+| `StartNode` | Ponto de entrada | Não interativo |
+| `EndNode` | Ponto de saída | Não interativo |
+| `PerformActionNode` | Exibe ação | Interativo |
+| `BinaryConditionNode` | Pergunta sim/não | Interativo |
+| `MultipleChoiceNode` | Múltiplas opções | Interativo |
+| `JumpToGraphNode` | Salto para outro grafo | Não interativo |
+| `Graph` | Grafo completo | Container |
+
+---
+
+## 📝 Notas
+
+Este documento será atualizado continuamente conforme novas funcionalidades são implementadas. Cada nova seção seguirá o mesmo formato:
+- O que foi implementado
+- Lógica do código
+- Regras implementadas
+
+---
+
+**Última atualização:** Etapa 4 - Classes Base de Grafos de Decisão
+
