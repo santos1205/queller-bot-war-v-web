@@ -6,8 +6,8 @@
 
 Este documento rastreia o progresso da conversão do projeto **Queller Bot** (War of the Ring) para **War Vikings Bot**, um sistema de IA para jogar War Vikings solo.
 
-**Data de Início:** 2024  
-**Status Atual:** 🟡 Planejamento e Estruturação
+**Data de Início:** 20/12/2025  
+**Status Atual:** 🟡 Implementação - Core System Completo
 
 ---
 
@@ -21,13 +21,13 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 
 | Componente | Status | Progresso |
 |------------|--------|-----------|
-| Estrutura Base | 🟡 Em Progresso | 30% |
-| Sistema de Estado | 🟡 Em Progresso | 60% |
-| Grafos de Decisão | ⬜ Não Iniciado | 0% |
+| Estrutura Base | 🟢 Completo | 100% |
+| Sistema de Estado | 🟢 Completo | 100% |
+| Grafos de Decisão | 🟡 Em Progresso | 80% |
 | Sistema de Combate | ⬜ Não Iniciado | 0% |
 | Interface CLI | ⬜ Não Iniciado | 0% |
 | Mecânicas Especiais | ⬜ Não Iniciado | 0% |
-| Documentação | 🟡 Em Progresso | 30% |
+| Documentação | 🟡 Em Progresso | 50% |
 
 **Legenda:**
 - 🟢 Completo
@@ -112,9 +112,9 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 ### 4. Grafos de Decisão (Árvores de Decisão)
 
 #### 4.1 Estrutura Base dos Grafos
-- [ ] Criar classes base de nós (`Node`, `StartNode`, `EndNode`, etc.)
-- [ ] Criar classes de nós: `PerformActionNode`, `BinaryConditionNode`, `MultipleChoiceNode`, `JumpToGraphNode`
-- [ ] Decidir formato de grafos (JSON ou classes C#)
+- [x] Criar classes base de nós (`Node`, `StartNode`, `EndNode`, etc.)
+- [x] Criar classes de nós: `PerformActionNode`, `BinaryConditionNode`, `MultipleChoiceNode`, `JumpToGraphNode`
+- [x] Decidir formato de grafos (JSON ou classes C#) - Classes C#
 - [ ] Criar sistema de carregamento de grafos
 - [ ] Criar novos tipos de nós específicos se necessário
 
@@ -270,10 +270,10 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 ### 8. Sistema de Navegação (GraphCrawler)
 
 #### 8.1 Adaptação do Crawler
-- [ ] Criar classe `GraphCrawler` para War Vikings
-- [ ] Manter sistema de auto-navegação
-- [ ] Manter sistema de undo
-- [ ] Adaptar para novos tipos de estado
+- [x] Criar classe `GraphCrawler` para War Vikings
+- [x] Manter sistema de auto-navegação
+- [x] Manter sistema de undo
+- [x] Adaptar para novos tipos de estado
 - [ ] Implementar navegação assíncrona (se necessário)
 
 #### 8.2 Nós Específicos
@@ -366,7 +366,7 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 ### Fase 2: Core System
 - [x] Implementar tipos de dados básicos
 - [x] Implementar sistema de estado
-- [ ] Adaptar GraphCrawler
+- [x] Adaptar GraphCrawler
 - [ ] Criar primeiro grafo de teste
 
 ### Fase 3: Mecânicas Principais
@@ -475,10 +475,21 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 
 ## 🔄 Histórico de Atualizações
 
-### 2024 - Início do Projeto
-- **Data:** [Data atual]
+### 20/12/2025 - Início do Projeto
+- **Data:** 20/12/2025
 - **Ação:** Criação do documento de progresso
 - **Status:** Planejamento inicial completo
+
+### 20/12/2025 - Core System Implementado
+- **Data:** 20/12/2025
+- **Ação:** Implementação completa do Core System
+- **Status:** 
+  - ✅ Estrutura base do projeto (.NET 8.0)
+  - ✅ Tipos de dados básicos (enums e classes)
+  - ✅ Sistema de Estado (`WarVikingsState`)
+  - ✅ Classes base de grafos de decisão (Node, Graph, etc.)
+  - ✅ GraphCrawler implementado
+  - 📝 Documentação de explicação criada (`explicacao-projeto.md`)
 
 [↑ Voltar ao topo](#-visão-geral)
 
@@ -490,8 +501,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [x] `.csproj` configurado
 - [x] Tipos de dados definidos (enums e classes)
 - [x] Sistema de estado implementado (`WarVikingsState`)
-- [ ] Motor de grafos implementado (`Graph`, `Node`, etc.)
-- [ ] GraphCrawler implementado
+- [x] Motor de grafos implementado (`Graph`, `Node`, etc.)
+- [x] GraphCrawler implementado
 - [ ] Primeiro grafo funcionando
 - [ ] Sistema de combate implementado
 - [ ] CLI adaptado (`CliInterface` ou `System.CommandLine`)
@@ -505,6 +516,6 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 
 ---
 
-**Última atualização:** [Data será atualizada automaticamente]  
+**Última atualização:** 20/12/2025  
 **Mantido por:** Equipe de Desenvolvimento War Vikings Bot
 

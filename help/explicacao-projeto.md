@@ -807,5 +807,5 @@ Este documento será atualizado continuamente conforme novas funcionalidades sã
 
 ---
 
-**Última atualização:** Etapa 5 - GraphCrawler - Navegador de Grafos
+**Última atualização:** 20/12/2025 - Etapa 5 - GraphCrawler - Navegador de Grafos
 
