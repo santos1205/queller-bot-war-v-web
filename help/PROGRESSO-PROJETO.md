@@ -20,7 +20,7 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 | Componente | Status | Progresso |
 |------------|--------|-----------|
 | Estrutura Base | 🟡 Em Progresso | 30% |
-| Sistema de Estado | ⬜ Não Iniciado | 0% |
+| Sistema de Estado | 🟡 Em Progresso | 60% |
 | Grafos de Decisão | ⬜ Não Iniciado | 0% |
 | Sistema de Combate | ⬜ Não Iniciado | 0% |
 | Interface CLI | ⬜ Não Iniciado | 0% |
@@ -59,18 +59,18 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 ### 2. Sistema de Estado (State Management)
 
 #### 2.1 Estado do Jogo
-- [ ] Criar classe `WarVikingsState` (equivalente a `QuellerState`)
-- [ ] Implementar rastreamento de territórios
-- [ ] Implementar rastreamento de exércitos por território
+- [x] Criar classe `WarVikingsState` (equivalente a `QuellerState`)
+- [x] Implementar rastreamento de territórios
+- [x] Implementar rastreamento de exércitos por território
 - [ ] Implementar rastreamento de regiões conquistadas
-- [ ] Implementar rastreamento de cartas de território
-- [ ] Implementar rastreamento de cartas-objetivo
-- [ ] Implementar rastreamento de exércitos no Valhalla (máx 6)
-- [ ] Implementar rastreamento de navios de guerra (máx 5)
-- [ ] Implementar rastreamento de comandante
+- [x] Implementar rastreamento de cartas de território
+- [x] Implementar rastreamento de cartas-objetivo
+- [x] Implementar rastreamento de exércitos no Valhalla (máx 6)
+- [x] Implementar rastreamento de navios de guerra (máx 5)
+- [x] Implementar rastreamento de comandante
 
 #### 2.2 Efeito de Comando
-- [ ] Criar enum `CommandEffect` (Grito de Batalha, Águas Sangrentas, Parede de Escudos, Prece da Guerra)
+- [x] Criar enum `CommandEffectType` (Grito de Batalha, Águas Sangrentas, Parede de Escudos, Prece da Guerra)
 - [ ] Implementar sorteio de efeito no início
 - [ ] Implementar aplicação de efeitos em combate
 
@@ -85,18 +85,18 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 ### 3. Tipos de Dados e Enums
 
 #### 3.1 Componentes do Jogo
-- [ ] Criar enum `ArmyType` (Guerreiro, EmblemaDoCla)
-- [ ] Criar enum `TerritoryType` (ComPorto, SemPorto)
+- [x] Criar enum `ArmyType` (Guerreiro, EmblemaDoCla)
+- [x] Criar enum `TerritoryType` (ComPorto, SemPorto)
 - [ ] Criar enum `RegionType` (regiões do tabuleiro)
-- [ ] Criar enum `GodType` (Odin, Thor, Loki, etc.)
-- [ ] Criar enum `CommandEffectType` (GritoDeBatalha, AguasSangrentas, ParedeDeEscudos, PreceDaGuerra)
-- [ ] Criar classe `Territory` (nome, tipo, porto, ocupação)
-- [ ] Criar classe `Army` (tipo, quantidade, localização)
-- [ ] Criar classe `Ship` (localização, porto)
+- [x] Criar enum `GodType` (Odin, Thor, Loki, etc.)
+- [x] Criar enum `CommandEffectType` (GritoDeBatalha, AguasSangrentas, ParedeDeEscudos, PreceDaGuerra)
+- [x] Criar classe `Territory` (nome, tipo, porto, ocupação)
+- [x] Criar classe `Army` (tipo, quantidade, localização)
+- [x] Criar classe `Ship` (localização, porto)
 
 #### 3.2 Sistema de Combate
-- [ ] Criar enum `DiceColor` (Vermelho, Amarelo)
-- [ ] Criar classe `CombatResult` (rolagens, comparações, perdas)
+- [x] Criar enum `DiceColor` (Vermelho, Amarelo)
+- [x] Criar classe `CombatResult` (rolagens, comparações, perdas)
 - [ ] Implementar lógica de rolagem de dados (máx 3 dados por lado)
 
 ---
@@ -340,8 +340,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [x] Criar estrutura base do projeto
 
 ### Fase 2: Core System
-- [ ] Implementar tipos de dados básicos
-- [ ] Implementar sistema de estado
+- [x] Implementar tipos de dados básicos
+- [x] Implementar sistema de estado
 - [ ] Adaptar GraphCrawler
 - [ ] Criar primeiro grafo de teste
 
@@ -384,6 +384,48 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - Valhalla e poderes dos deuses são únicos
 - Combate naval é nova mecânica
 
+### Documentação de Implementação
+**IMPORTANTE:** Toda implementação de código será acompanhada de uma explicação detalhada que inclui:
+
+1. **O que foi implementado:**
+   - Descrição clara do componente, classe ou funcionalidade criada
+   - Estrutura de dados utilizada
+   - Propósito e responsabilidades
+
+2. **Como funciona (Lógica do código):**
+   - Explicação passo a passo do funcionamento interno
+   - Fluxo de execução
+   - Relações entre componentes
+   - Algoritmos e decisões de design
+
+3. **Qual regra do jogo foi implementada:**
+   - Referência específica às regras do jogo (com citações de `help/regras.md`)
+   - Mapeamento entre código e regras
+   - Validações e restrições implementadas
+   - Exceções e casos especiais tratados
+
+**Formato e Localização:**
+- As explicações serão fornecidas **neste chat** após cada etapa de implementação
+- Formato padrão:
+```
+## Explicação: [Nome do Componente]
+
+### O que foi implementado
+[Descrição do componente]
+
+### Lógica do código
+[Explicação detalhada do funcionamento]
+
+### Regras implementadas
+[Referências às regras do jogo com citações]
+```
+
+**Objetivo:**
+- Garantir rastreabilidade e compreensão do código
+- Facilitar manutenção futura
+- Documentar decisões de design
+- Validar implementação contra as regras do jogo
+
 ### Referências
 - Projeto legado: `projeto-legado/` (Julia - referência arquitetural)
 - Regras do jogo: `help/regras.md`
@@ -412,10 +454,10 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 
 ## ✅ Checklist Rápido
 
-- [ ] Estrutura base criada (.NET project)
-- [ ] `.csproj` configurado
-- [ ] Tipos de dados definidos (enums e classes)
-- [ ] Sistema de estado implementado (`WarVikingsState`)
+- [x] Estrutura base criada (.NET project)
+- [x] `.csproj` configurado
+- [x] Tipos de dados definidos (enums e classes)
+- [x] Sistema de estado implementado (`WarVikingsState`)
 - [ ] Motor de grafos implementado (`Graph`, `Node`, etc.)
 - [ ] GraphCrawler implementado
 - [ ] Primeiro grafo funcionando
