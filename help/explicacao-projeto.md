@@ -13,6 +13,7 @@ Este documento contém explicações detalhadas de cada componente implementado 
 2. [Tipos de Dados Básicos](#2-tipos-de-dados-básicos)
 3. [Sistema de Estado (WarVikingsState)](#3-sistema-de-estado-warvikingsstate)
 4. [Classes Base de Grafos de Decisão](#4-classes-base-de-grafos-de-decisão)
+5. [GraphCrawler - Navegador de Grafos](#5-graphcrawler---navegador-de-grafos)
 
 ---
 
@@ -478,6 +479,313 @@ Este sistema não implementa regras específicas do jogo diretamente. Ele fornec
 
 ---
 
+## 5. GraphCrawler - Navegador de Grafos
+
+### O que foi implementado
+
+A classe `GraphCrawler` é o "motor" que navega automaticamente pelos grafos de decisão. Ela funciona como um leitor automático que percorre a árvore de decisão, acumulando mensagens e parando apenas quando precisa de interação do usuário.
+
+### Estrutura da Classe
+
+#### Propriedades Principais
+
+```csharp
+private Dictionary<string, Graph> _graphs;
+```
+- Armazena todos os grafos disponíveis
+- Permite navegação entre grafos diferentes
+
+```csharp
+private WarVikingsState _state;
+```
+- Referência ao estado do jogo
+- Permite que os nós acessem informações do jogo
+
+```csharp
+private Node? _currentNode;
+```
+- Nó atual sendo processado
+- Muda conforme a navegação progride
+
+```csharp
+private StartNode? _rootNode;
+```
+- Nó raiz do grafo atual
+- Usado para reiniciar navegação (undo)
+
+```csharp
+private Stack<Node> _jumpStack;
+```
+- Pilha de nós de salto (`JumpToGraphNode`)
+- Permite rastrear chamadas aninhadas de grafos
+
+```csharp
+private List<string> _options;
+```
+- Histórico de opções escolhidas pelo usuário
+- Usado para implementar funcionalidade de undo
+
+```csharp
+private string _messageBuffer;
+```
+- Buffer que acumula mensagens dos nós
+- Exibido quando encontra nó interativo
+
+### Métodos Principais
+
+#### `AutoCrawl()`
+
+**Lógica:**
+```csharp
+private void AutoCrawl()
+{
+    _messageBuffer = string.Empty;
+    
+    while (!IsAtEnd() && _currentNode != null)
+    {
+        AddToMessageBuffer(_currentNode);
+        
+        if (_currentNode is InteractiveNode)
+            break;  // Para e espera interação
+        
+        _currentNode = GetNextNode(_currentNode);
+    }
+}
+```
+
+**Funcionamento:**
+1. Limpa o buffer de mensagens
+2. Enquanto não chegou ao fim e há nó atual:
+   - Adiciona mensagem do nó ao buffer
+   - Se o nó é interativo, para e aguarda resposta
+   - Se não é interativo, avança automaticamente para o próximo
+3. Repete até encontrar nó interativo ou fim do grafo
+
+**Exemplo de fluxo:**
+```
+StartNode → PerformActionNode → PerformActionNode → BinaryConditionNode
+                                                      ↑ PARA AQUI
+Buffer: "Ação 1\nAção 2\nPergunta?"
+```
+
+#### `Proceed(string option)`
+
+**Lógica:**
+```csharp
+public void Proceed(string option)
+{
+    if (_currentNode is InteractiveNode interactiveNode)
+    {
+        _options.Add(option);  // Salva escolha
+        _currentNode = interactiveNode.GetNext(option);  // Vai para próximo
+        AutoCrawl();  // Continua navegação automática
+    }
+}
+```
+
+**Funcionamento:**
+1. Verifica se nó atual é interativo
+2. Salva a opção escolhida no histórico
+3. Obtém próximo nó baseado na opção
+4. Continua navegação automática (`AutoCrawl()`)
+
+**Exemplo:**
+```
+Usuário escolhe "true" em BinaryConditionNode
+→ Salva "true" no histórico
+→ Vai para TrueNode
+→ AutoCrawl() continua até próximo nó interativo
+```
+
+#### `Undo()`
+
+**Lógica:**
+```csharp
+public void Undo()
+{
+    if (!CanUndo())
+        return;
+    
+    _options.RemoveAt(_options.Count - 1);  // Remove última escolha
+    
+    // Reinicia navegação do início
+    _currentNode = _rootNode;
+    _jumpStack.Clear();
+    _messageBuffer = string.Empty;
+    
+    AutoCrawl();
+    
+    // Reaplica todas as escolhas anteriores
+    foreach (var option in _options)
+    {
+        if (_currentNode is InteractiveNode interactiveNode)
+        {
+            _currentNode = interactiveNode.GetNext(option);
+            AutoCrawl();
+        }
+    }
+}
+```
+
+**Funcionamento:**
+1. Remove última opção do histórico
+2. Reinicia navegação do nó raiz
+3. Limpa pilha de saltos e buffer
+4. Reaplica todas as escolhas anteriores em ordem
+5. Resultado: estado anterior à última escolha
+
+**Exemplo:**
+```
+Histórico: ["true", "2", "false"]
+Undo() → Remove "false"
+→ Reinicia do StartNode
+→ Reaplica "true" → "2"
+→ Estado: após escolha "2", antes de "false"
+```
+
+#### `GetNextNode(Node node)`
+
+**Lógica:**
+```csharp
+private Node? GetNextNode(Node node)
+{
+    if (node is NonInteractiveNode nonInteractiveNode)
+    {
+        var next = nonInteractiveNode.GetNext();
+        
+        if (node is JumpToGraphNode jumpNode)
+        {
+            HandleJump(jumpNode);
+            return GetNextNode(jumpNode);
+        }
+        
+        if (node is ReturnFromGraphNode)
+        {
+            return HandleReturn();
+        }
+        
+        return next;
+    }
+    
+    return null;
+}
+```
+
+**Funcionamento:**
+1. Verifica se nó é não-interativo
+2. Obtém próximo nó
+3. Se é `JumpToGraphNode`, trata salto para outro grafo
+4. Se é `ReturnFromGraphNode`, trata retorno de grafo chamado
+5. Retorna próximo nó
+
+#### `HandleJump(JumpToGraphNode jumpNode)`
+
+**Lógica:**
+```csharp
+private void HandleJump(JumpToGraphNode jumpNode)
+{
+    _jumpStack.Push(jumpNode);  // Salva nó de salto na pilha
+    
+    var targetGraph = _graphs[jumpNode.TargetGraphId];
+    _currentNode = targetGraph.RootNode;  // Vai para raiz do grafo destino
+}
+```
+
+**Funcionamento:**
+1. Empilha nó de salto (para retornar depois)
+2. Busca grafo destino pelo ID
+3. Muda nó atual para raiz do grafo destino
+4. Navegação continua no novo grafo
+
+**Exemplo:**
+```
+Grafo A: JumpToGraphNode("combate")
+→ Empilha JumpToGraphNode
+→ Vai para StartNode do grafo "combate"
+→ Navega grafo de combate
+→ ReturnFromGraphNode
+→ Desempilha e retorna para Next do JumpToGraphNode
+```
+
+#### `HandleReturn()`
+
+**Lógica:**
+```csharp
+private Node? HandleReturn()
+{
+    if (_jumpStack.Count == 0)
+        return null;
+    
+    var jumpNode = _jumpStack.Pop();  // Recupera nó de salto
+    if (jumpNode is JumpToGraphNode jump)
+    {
+        return jump.GetNext();  // Retorna para próximo nó após salto
+    }
+    return null;
+}
+```
+
+**Funcionamento:**
+1. Verifica se há nó de salto na pilha
+2. Desempilha nó de salto
+3. Retorna próximo nó do nó de salto (continuação após sub-grafo)
+
+### Lógica do código
+
+O `GraphCrawler` implementa o padrão **State Machine** (Máquina de Estados):
+- **Estado**: Nó atual no grafo
+- **Transição**: Resposta do usuário ou navegação automática
+- **Ação**: Acumular mensagens, processar nós
+
+**Fluxo completo:**
+```
+1. Inicialização
+   → Cria crawler com grafo inicial
+   → AutoCrawl() navega até primeiro nó interativo
+
+2. Loop principal
+   → Exibe mensagem acumulada
+   → Aguarda resposta do usuário
+   → Proceed() com resposta
+   → AutoCrawl() continua navegação
+   → Repete até EndNode
+
+3. Undo
+   → Remove última escolha
+   → Reinicia do início
+   → Reaplica escolhas anteriores
+```
+
+### Regras implementadas
+
+Este componente não implementa regras específicas do jogo diretamente. Ele implementa a **mecânica de navegação** que permite executar as regras definidas nos grafos.
+
+**Conceito:** O `GraphCrawler` é o "executor" dos grafos de decisão. Ele:
+- Lê os grafos (árvores de decisão)
+- Navega automaticamente por nós não-interativos
+- Para em nós interativos para aguardar resposta
+- Gerencia saltos entre grafos (modularização)
+- Permite desfazer escolhas (undo)
+
+**Uso no jogo:**
+- Cada fase do turno será executada através de um grafo
+- O crawler navega pelo grafo guiando o jogador
+- Sub-grafos permitem reutilizar lógica (combate, troca de cartas, etc.)
+- Undo permite corrigir erros ou testar diferentes escolhas
+
+### Resumo
+
+| Funcionalidade | Método | Descrição |
+|----------------|--------|-----------|
+| Navegação automática | `AutoCrawl()` | Percorre nós não-interativos automaticamente |
+| Processamento de escolhas | `Proceed()` | Avança baseado na resposta do usuário |
+| Desfazer escolhas | `Undo()` | Volta para estado anterior |
+| Salto entre grafos | `HandleJump()` | Chama outro grafo como sub-rotina |
+| Retorno de grafos | `HandleReturn()` | Retorna de grafo chamado |
+| Acumulação de mensagens | `AddToMessageBuffer()` | Coleta mensagens para exibição |
+
+---
+
 ## 📝 Notas
 
 Este documento será atualizado continuamente conforme novas funcionalidades são implementadas. Cada nova seção seguirá o mesmo formato:
@@ -487,5 +795,5 @@ Este documento será atualizado continuamente conforme novas funcionalidades sã
 
 ---
 
-**Última atualização:** Etapa 4 - Classes Base de Grafos de Decisão
+**Última atualização:** Etapa 5 - GraphCrawler - Navegador de Grafos
 
