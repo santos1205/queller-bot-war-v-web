@@ -990,6 +990,195 @@ EndNode: "Fase 1 concluída."
 
 O grafo verifica primeiro se o jogador tem 5 ou mais cartas (troca obrigatória). Se não tiver, oferece troca opcional. Após a troca (ou se não trocou), calcula e exibe os exércitos recebidos por territórios e regiões, permitindo que o jogador aloque os exércitos.
 
+### Phase2Graph - Fase 2: Ataques
+
+#### Estrutura do Grafo
+
+O grafo `Phase2Graph` implementa a segunda fase do turno, onde o jogador pode realizar ataques contra territórios inimigos.
+
+#### Fluxo do Grafo
+
+```
+StartNode
+  ↓
+PerformActionNode: "FASE 2: ATAQUES"
+  ↓
+BinaryConditionNode: "É a primeira rodada?"
+  ├─ true → PerformActionNode: "Primeira rodada: não há ataques"
+  │         ↓
+  │         EndNode
+  └─ false → BinaryConditionNode: "Você tem territórios que podem atacar?"
+              ├─ false → PerformActionNode: "Você não tem territórios atacáveis"
+              │         ↓
+              │         EndNode
+              └─ true → BinaryConditionNode: "Você quer realizar um ataque?"
+                          ├─ false → PerformActionNode: "Você decidiu não atacar"
+                          │         ↓
+                          │         EndNode
+                          └─ true → ExecuteActionNode: "set_combat_source"
+                                    ↓
+                                    ExecuteActionNode: "set_combat_target"
+                                    ↓
+                                    JumpToGraphNode("combat")
+                                    ↓
+                                    PerformActionNode: "Combate resolvido"
+                                    ↓
+                                    (loop de volta para perguntar se quer atacar novamente)
+```
+
+#### Lógica do código
+
+O grafo verifica se é a primeira rodada (sem ataques). Se não for, verifica se há territórios que podem atacar (mínimo 2 exércitos). Se houver, pergunta se o jogador quer atacar. Se sim, define os territórios de origem e alvo (atualmente usa o primeiro disponível) e chama o `CombatGraph` para resolver o combate. Após o combate, pergunta novamente se quer atacar (loop).
+
+**Regra implementada:** (regras.md, linhas 50-54)
+> "**2. Ataques (Combate Terrestre):**
+> - O ataque é anunciado contra um território inimigo contíguo (ou por linha pontilhada), desde que o atacante tenha no mínimo 2 exércitos no território de origem (sendo 1 o exército de ocupação, que não ataca).
+> - O atacante pode usar no máximo 3 dados vermelhos, e o defensor, no máximo 3 dados amarelos, limitados pelo número de exércitos.
+> - **Resolução de Combate (Rolagem de Dados):** Comparam-se os dados de maior ponto do atacante com os de maior ponto do defensor, e assim sucessivamente (segundo maior com segundo maior, etc.). **A vitória é definida por quem tiver mais pontos no dado, e em caso de empate, a vitória é da defesa**. O perdedor perde 1 exército. Os exércitos perdidos retornam à reserva do jogador.
+> - **Conquista de Território:** Ocorre quando todos os exércitos defensores são destruídos. O atacante deve mover exércitos para o território conquistado (mínimo 1, máximo 3, e nunca mais do que os exércitos que participaram do ataque)."
+
+### CombatGraph - Sub-grafo de Resolução de Combate
+
+#### Estrutura do Grafo
+
+O grafo `CombatGraph` implementa a resolução de um combate terrestre entre atacante e defensor.
+
+#### Fluxo do Grafo
+
+```
+StartNode
+  ↓
+PerformActionNode: "RESOLUÇÃO DE COMBATE"
+  ↓
+BinaryConditionNode: "O comandante está presente?"
+  ├─ true → PerformActionNode: "Efeito de Comando disponível"
+  └─ false → (pula)
+            ↓
+BinaryConditionNode: "Você quer invocar poder dos deuses?"
+  ├─ true → PerformActionNode: "Poder dos deuses será invocado"
+  └─ false → (pula)
+            ↓
+ExecuteActionNode: "resolve_combat" (rola dados, compara, calcula perdas)
+  ↓
+PerformActionNode: "Resultados da rolagem calculados"
+  ↓
+PerformActionNode: "Comparando dados..."
+  ↓
+PerformActionNode: "Perdas calculadas"
+  ↓
+ExecuteActionNode: "apply_combat_losses" (aplica perdas ao estado)
+  ↓
+BinaryConditionNode: "O território foi conquistado?"
+  ├─ true → PerformActionNode: "Território conquistado!"
+            ↓
+            ExecuteActionNode: "move_armies_after_conquest" (move exércitos)
+            ↓
+            EndNode
+  └─ false → PerformActionNode: "Território não foi conquistado"
+            ↓
+            EndNode
+```
+
+#### Lógica do código
+
+O grafo verifica se há comandante (para efeitos de comando) e se o jogador quer usar poder dos deuses. Depois, executa a resolução do combate (`resolve_combat`) que rola os dados, compara e calcula perdas. Em seguida, aplica as perdas ao estado (`apply_combat_losses`). Se o território foi conquistado, move exércitos para o território conquistado.
+
+**Regra implementada:** (regras.md, linhas 50-54) - Mesmas regras da Fase 2 acima.
+
+### ExecuteActionNode - Nó de Execução de Ações
+
+#### O que foi implementado
+
+O `ExecuteActionNode` é um novo tipo de nó que executa ações reais no estado do jogo, diferente do `PerformActionNode` que apenas exibe mensagens.
+
+#### Estrutura
+
+```csharp
+public class ExecuteActionNode : InteractiveNode
+{
+    public string Message { get; set; }      // Mensagem exibida ao usuário
+    public string ActionId { get; set; }      // ID da ação a executar
+    public Node? Next { get; set; }          // Próximo nó
+}
+```
+
+#### Ações Implementadas
+
+O `GraphCrawler` processa as seguintes ações quando encontra um `ExecuteActionNode`:
+
+1. **`resolve_combat`**: Chama `ResolveCombat()` no `WarVikingsState`
+   - Rola dados do atacante e defensor
+   - Compara dados (maior com maior, segundo com segundo)
+   - Calcula perdas
+   - Armazena resultado em `CurrentCombatResult`
+
+2. **`apply_combat_losses`**: Chama `ApplyCombatLosses()` no `WarVikingsState`
+   - Remove exércitos do atacante e defensor
+   - Transfere território se conquistado
+
+3. **`move_armies_after_conquest`**: Chama `MoveArmiesAfterConquest()` no `WarVikingsState`
+   - Move exércitos do território de origem para o conquistado
+   - Respeita limites (mínimo 1, máximo 3)
+
+4. **`set_combat_source`**: Define o território de origem do combate
+   - Atualmente usa o primeiro território atacável disponível
+   - TODO: Implementar seleção real do usuário
+
+5. **`set_combat_target`**: Define o território alvo do combate
+   - Atualmente usa o primeiro território atacável a partir da origem
+   - TODO: Implementar seleção real do usuário
+
+#### Lógica do código
+
+Quando o `GraphCrawler` encontra um `ExecuteActionNode`, ele chama o método `ExecuteAction()` que processa o `ActionId` e executa a ação correspondente no `WarVikingsState`. Isso permite que os grafos executem lógica real além de apenas exibir mensagens.
+
+**Regra implementada:** Permite a execução de ações do jogo através dos grafos de decisão, conectando a estrutura de grafos com a lógica do estado do jogo.
+
+### Phase3Graph - Fase 3: Deslocamento de Exércitos
+
+#### Estrutura do Grafo
+
+O grafo `Phase3Graph` implementa a terceira fase do turno, onde o jogador pode deslocar exércitos entre territórios contíguos do mesmo jogador.
+
+#### Fluxo do Grafo
+
+```
+StartNode
+  ↓
+PerformActionNode: "FASE 3: DESLOCAMENTO DE EXÉRCITOS"
+  ↓
+BinaryConditionNode: "Você tem possibilidades de deslocamento?"
+  ├─ false → PerformActionNode: "Você não tem possibilidades de deslocamento"
+  │         ↓
+  │         EndNode
+  └─ true → BinaryConditionNode: "Você quer realizar um deslocamento?"
+              ├─ false → PerformActionNode: "Você decidiu não deslocar"
+              │         ↓
+              │         EndNode
+              └─ true → ExecuteActionNode: "set_movement_source"
+                        ↓
+                        ExecuteActionNode: "set_movement_target"
+                        ↓
+                        PerformActionNode: "Quantos exércitos mover?"
+                        ↓
+                        ExecuteActionNode: "execute_movement"
+                        ↓
+                        PerformActionNode: "Deslocamento realizado"
+                        ↓
+                        EndNode
+```
+
+#### Lógica do código
+
+O grafo verifica se há possibilidades de deslocamento (territórios com mais de 1 exército e territórios contíguos do mesmo jogador). Se houver, pergunta se o jogador quer deslocar. Se sim, define os territórios de origem e destino (atualmente usa o primeiro disponível) e executa o deslocamento. A regra de apenas 1 deslocamento por turno é implementada pela estrutura do grafo (não há loop).
+
+**Regra implementada:** (regras.md, linhas 56-60)
+> "**3. Deslocamento de Exércitos:**
+> - Realizado no final do turno.
+> - O deslocamento é feito entre territórios contíguos do jogador.
+> - Um exército deve permanecer no território de origem.
+> - É permitido apenas um deslocamento (transferência de exércitos) por turno, exceto para mover exércitos para um território recém-conquistado, que é um deslocamento imediato."
+
 **Regra implementada:** (regras.md, linhas 45-48)
 > "**1. Recebimento de Exércitos:** O jogador recebe exércitos no início do turno de três maneiras:
 > - **Territórios Possuídos:** Soma-se o número de territórios possuídos e divide-se por 2 (o resultado é arredondado para baixo). O mínimo de exércitos a receber é 3, a não ser que o jogador possua menos de 6 territórios.

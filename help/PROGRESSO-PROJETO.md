@@ -28,7 +28,9 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 | Interface CLI | 🟢 Completo | 100% |
 | Grafo de Teste | 🟢 Completo | 100% |
 | Fase 1 - Recebimento de Exércitos | 🟢 Completo | 100% |
-| Sistema de Combate | ⬜ Não Iniciado | 0% |
+| Fase 2 - Ataques | 🟡 Em Progresso | 80% |
+| Fase 3 - Deslocamento de Exércitos | 🟢 Completo | 100% |
+| Sistema de Combate | 🟡 Em Progresso | 70% |
 | Mecânicas Especiais | 🟡 Em Progresso | 20% |
 | Documentação | 🟡 Em Progresso | 70% |
 
@@ -107,7 +109,10 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 #### 3.2 Sistema de Combate
 - [x] Criar enum `DiceColor` (Vermelho, Amarelo)
 - [x] Criar classe `CombatResult` (rolagens, comparações, perdas)
-- [ ] Implementar lógica de rolagem de dados (máx 3 dados por lado)
+- [x] Implementar lógica de rolagem de dados (máx 3 dados por lado)
+- [x] Implementar resolução de combate (`ResolveCombat()`)
+- [x] Implementar aplicação de perdas (`ApplyCombatLosses()`)
+- [x] Implementar movimento de exércitos após conquista (`MoveArmiesAfterConquest()`)
 
 [↑ Voltar ao topo](#-visão-geral)
 
@@ -131,19 +136,19 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
   - [x] Implementar troca de cartas (3 iguais ou 3 diferentes)
   - [ ] Alocar exércitos recebidos (interface de alocação pendente)
 
-- [ ] **Fase 2: Ataques**
-  - [ ] Identificar territórios atacáveis (contíguos, min 2 exércitos)
-  - [ ] Selecionar alvos prioritários
-  - [ ] Resolver combates (rolagem de dados)
-  - [ ] Aplicar poderes dos deuses (se invocados)
-  - [ ] Aplicar efeitos de comando (se comandante presente)
-  - [ ] Conquistar territórios (se defensor eliminado)
-  - [ ] Mover exércitos para território conquistado
+- [x] **Fase 2: Ataques**
+  - [x] Identificar territórios atacáveis (contíguos, min 2 exércitos)
+  - [x] Selecionar alvos prioritários (estrutura pronta, seleção automática temporária)
+  - [x] Resolver combates (rolagem de dados)
+  - [ ] Aplicar poderes dos deuses (se invocados) - estrutura pronta
+  - [ ] Aplicar efeitos de comando (se comandante presente) - estrutura pronta
+  - [x] Conquistar territórios (se defensor eliminado)
+  - [x] Mover exércitos para território conquistado
 
-- [ ] **Fase 3: Deslocamento de Exércitos**
-  - [ ] Identificar possibilidades de deslocamento
-  - [ ] Selecionar deslocamentos estratégicos
-  - [ ] Executar deslocamento (1 por turno, exceto após conquista)
+- [x] **Fase 3: Deslocamento de Exércitos**
+  - [x] Identificar possibilidades de deslocamento
+  - [x] Selecionar deslocamentos estratégicos (estrutura pronta, seleção automática temporária)
+  - [x] Executar deslocamento (1 por turno, exceto após conquista)
 
 - [ ] **Fase 4: Recebimento de Carta de Território**
   - [ ] Verificar se conquistou território adversário
@@ -151,11 +156,11 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
   - [ ] Verificar se acumulou 5+ cartas (forçar troca)
 
 #### 4.3 Sub-grafos Especializados
-- [ ] **CombatGraph.cs** ou **combat.json** - Resolução de combate terrestre
-  - [ ] Rolagem de dados (vermelhos vs amarelos)
-  - [ ] Comparação de resultados (maior com maior, etc.)
-  - [ ] Aplicação de perdas
-  - [ ] Decisão de enviar para Valhalla ou reserva
+- [x] **CombatGraph.cs** - Resolução de combate terrestre
+  - [x] Rolagem de dados (vermelhos vs amarelos)
+  - [x] Comparação de resultados (maior com maior, etc.)
+  - [x] Aplicação de perdas
+  - [ ] Decisão de enviar para Valhalla ou reserva (estrutura pronta)
 
 - [ ] **NavalCombatGraph.cs** ou **combate-naval.json** - Resolução de combate naval
   - [ ] Verificação de navios em portos
@@ -537,6 +542,24 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
   - 📝 Documentação atualizada (`EXPLICACAO-PROJETO.md` e `PROGRESSO-PROJETO.md`)
   - ⚠️ Alocação de exércitos ainda requer interface de seleção de territórios
 
+### 30/12/2025 - Fase 2 - Ataques e Lógica de Combate Implementada
+- **Data:** 30/12/2025
+- **Ação:** Implementação da Fase 2 e lógica de combate
+- **Status:**
+  - ✅ `Phase2Graph.cs` criado e implementado
+  - ✅ `CombatGraph.cs` criado com lógica de combate
+  - ✅ `ExecuteActionNode` criado para executar ações no estado
+  - ✅ Métodos de combate implementados no `WarVikingsState`:
+    - `ResolveCombat()` - rolagem e resolução de combate
+    - `ApplyCombatLosses()` - aplicação de perdas
+    - `MoveArmiesAfterConquest()` - movimento após conquista
+  - ✅ Propriedades temporárias adicionadas para armazenar estado do combate atual
+  - ✅ `GraphCrawler` atualizado para executar ações via `ExecuteActionNode`
+  - ✅ Sistema compilando sem erros
+  - ⚠️ Seleção de territórios ainda automática (primeiro disponível)
+  - ⚠️ Verificação de conquista ainda requer input manual (pode ser automatizada)
+  - ⚠️ Efeitos de comando e poderes dos deuses têm estrutura pronta mas não aplicados na rolagem
+
 [↑ Voltar ao topo](#-visão-geral)
 
 ---
@@ -562,6 +585,6 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 
 ---
 
-**Última atualização:** 30/12/2025 - Fase 1 - Recebimento de Exércitos Implementada  
+**Última atualização:** 30/12/2025 - Fase 3 - Deslocamento de Exércitos Implementada  
 **Mantido por:** Equipe de Desenvolvimento War Vikings Bot
 

@@ -48,10 +48,13 @@ namespace WarVikingsBot.Graphs
                 Id = "combat_use_god_power"
             };
             
-            // Rola os dados
-            var rollDice = new PerformActionNode("Rolando dados de combate...")
+            // Rola os dados e resolve o combate
+            var resolveCombat = new ExecuteActionNode(
+                "Rolando dados de combate e resolvendo combate...",
+                "resolve_combat"
+            )
             {
-                Id = "combat_roll_dice"
+                Id = "combat_resolve_combat"
             };
             
             // Mostra resultados da rolagem
@@ -60,7 +63,7 @@ namespace WarVikingsBot.Graphs
                 Id = "combat_show_rolls"
             };
             
-            // Compara os dados
+            // Compara os dados (já feito em resolve_combat, apenas mostra mensagem)
             var compareDice = new PerformActionNode("Comparando dados: maior com maior, segundo com segundo...")
             {
                 Id = "combat_compare_dice"
@@ -73,7 +76,10 @@ namespace WarVikingsBot.Graphs
             };
             
             // Aplica perdas ao estado
-            var applyLosses = new PerformActionNode("Aplicando perdas ao estado do jogo...")
+            var applyLosses = new ExecuteActionNode(
+                "Aplicando perdas ao estado do jogo...",
+                "apply_combat_losses"
+            )
             {
                 Id = "combat_apply_losses"
             };
@@ -97,7 +103,10 @@ namespace WarVikingsBot.Graphs
             };
             
             // Move os exércitos
-            var moveArmies = new PerformActionNode("Movendo exércitos para o território conquistado...")
+            var moveArmies = new ExecuteActionNode(
+                "Movendo exércitos para o território conquistado...",
+                "move_armies_after_conquest"
+            )
             {
                 Id = "combat_move_armies"
             };
@@ -127,13 +136,13 @@ namespace WarVikingsBot.Graphs
             
             // Se quer usar poder dos deuses
             askGodPower.TrueNode = useGodPower;
-            useGodPower.Next = rollDice;
+            useGodPower.Next = resolveCombat;
             
             // Se não quer usar poder dos deuses
-            askGodPower.FalseNode = rollDice;
+            askGodPower.FalseNode = resolveCombat;
             
             // Sequência de resolução
-            rollDice.Next = showRolls;
+            resolveCombat.Next = showRolls;
             showRolls.Next = compareDice;
             compareDice.Next = showLosses;
             showLosses.Next = applyLosses;
@@ -159,7 +168,7 @@ namespace WarVikingsBot.Graphs
                 showCommandEffect,
                 askGodPower,
                 useGodPower,
-                rollDice,
+                resolveCombat,
                 showRolls,
                 compareDice,
                 showLosses,

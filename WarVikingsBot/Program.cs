@@ -50,6 +50,10 @@ namespace WarVikingsBot
                 var combatGraph = CombatGraph.Create();
                 graphs[combatGraph.Id] = combatGraph;
                 
+                // Grafo da Fase 3 - Deslocamento de Exércitos
+                var phase3Graph = Phase3Graph.Create();
+                graphs[phase3Graph.Id] = phase3Graph;
+                
                 // Criar GraphCrawler com o grafo da Fase 1 (ou test_graph para testes)
                 var crawler = new GraphCrawler("phase_1", graphs, state);
                 

@@ -101,6 +101,12 @@ namespace WarVikingsBot.Crawler
             {
                 AddToMessageBuffer(_currentNode);
                 
+                // Executar ação se for ExecuteActionNode
+                if (_currentNode is ExecuteActionNode executeNode)
+                {
+                    ExecuteAction(executeNode);
+                }
+                
                 if (_currentNode is InteractiveNode)
                     break;
                 
@@ -115,6 +121,132 @@ namespace WarVikingsBot.Crawler
                 }
                 
                 _currentNode = GetNextNode(_currentNode);
+            }
+        }
+        
+        private void ExecuteAction(ExecuteActionNode node)
+        {
+            var actionId = node.ActionId.ToLower();
+            var state = _state;
+            var playerId = state.CurrentPlayer;
+            
+            switch (actionId)
+            {
+                case "resolve_combat":
+                    if (!string.IsNullOrEmpty(state.CurrentCombatSourceTerritory) && 
+                        !string.IsNullOrEmpty(state.CurrentCombatTargetTerritory))
+                    {
+                        state.CurrentCombatResult = state.ResolveCombat(
+                            playerId,
+                            state.CurrentCombatSourceTerritory,
+                            state.CurrentCombatTargetTerritory
+                        );
+                    }
+                    break;
+                    
+                case "apply_combat_losses":
+                    if (state.CurrentCombatResult != null &&
+                        !string.IsNullOrEmpty(state.CurrentCombatSourceTerritory) &&
+                        !string.IsNullOrEmpty(state.CurrentCombatTargetTerritory))
+                    {
+                        state.ApplyCombatLosses(
+                            playerId,
+                            state.CurrentCombatSourceTerritory,
+                            state.CurrentCombatTargetTerritory,
+                            state.CurrentCombatResult
+                        );
+                    }
+                    break;
+                    
+                case "move_armies_after_conquest":
+                case "move_armies":
+                    if (!string.IsNullOrEmpty(state.CurrentCombatSourceTerritory) &&
+                        !string.IsNullOrEmpty(state.CurrentCombatTargetTerritory))
+                    {
+                        // Por padrão, move 1 exército (mínimo)
+                        // TODO: Permitir que o usuário escolha quantos mover
+                        state.MoveArmiesAfterConquest(
+                            playerId,
+                            state.CurrentCombatSourceTerritory,
+                            state.CurrentCombatTargetTerritory,
+                            1 // Por padrão, move 1 exército
+                        );
+                    }
+                    break;
+                    
+                case "set_combat_source":
+                    // Define o território de origem do combate
+                    // Por enquanto, usa o primeiro território atacável do jogador
+                    // TODO: Implementar seleção real do usuário
+                    var sources = state.GetAttackSourceTerritories(playerId);
+                    if (sources.Count > 0)
+                    {
+                        state.CurrentCombatSourceTerritory = sources[0];
+                    }
+                    break;
+                    
+                case "set_combat_target":
+                    // Define o território alvo do combate
+                    // Por enquanto, usa o primeiro território atacável a partir da origem
+                    // TODO: Implementar seleção real do usuário
+                    if (!string.IsNullOrEmpty(state.CurrentCombatSourceTerritory))
+                    {
+                        var targets = state.GetAttackableTargetsFromSource(playerId, state.CurrentCombatSourceTerritory);
+                        if (targets.Count > 0)
+                        {
+                            state.CurrentCombatTargetTerritory = targets[0];
+                        }
+                    }
+                    break;
+                    
+                case "set_movement_source":
+                    // Define o território de origem do deslocamento
+                    // Por enquanto, usa o primeiro território que pode deslocar
+                    // TODO: Implementar seleção real do usuário
+                    var movementSources = state.GetMovementSourceTerritories(playerId);
+                    if (movementSources.Count > 0)
+                    {
+                        state.CurrentMovementSourceTerritory = movementSources[0];
+                    }
+                    break;
+                    
+                case "set_movement_target":
+                    // Define o território de destino do deslocamento
+                    // Por enquanto, usa o primeiro território contíguo do mesmo jogador
+                    // TODO: Implementar seleção real do usuário
+                    if (!string.IsNullOrEmpty(state.CurrentMovementSourceTerritory))
+                    {
+                        var movementTargets = state.GetMovementTargetTerritories(playerId, state.CurrentMovementSourceTerritory);
+                        if (movementTargets.Count > 0)
+                        {
+                            state.CurrentMovementTargetTerritory = movementTargets[0];
+                        }
+                    }
+                    break;
+                    
+                case "execute_movement":
+                    // Executa o deslocamento de exércitos
+                    if (!string.IsNullOrEmpty(state.CurrentMovementSourceTerritory) &&
+                        !string.IsNullOrEmpty(state.CurrentMovementTargetTerritory))
+                    {
+                        // Por padrão, move 1 exército (mínimo)
+                        // TODO: Permitir que o usuário escolha quantos mover
+                        int armiesToMove = state.CurrentMovementArmies > 0 
+                            ? state.CurrentMovementArmies 
+                            : 1;
+                        
+                        state.ExecuteMovement(
+                            playerId,
+                            state.CurrentMovementSourceTerritory,
+                            state.CurrentMovementTargetTerritory,
+                            armiesToMove
+                        );
+                    }
+                    break;
+                    
+                default:
+                    // Ação desconhecida - não faz nada
+                    break;
             }
         }
         

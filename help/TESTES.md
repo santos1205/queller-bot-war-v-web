@@ -4,7 +4,7 @@
 
 Este documento contém o roteiro completo de testes para validar o funcionamento do War Vikings Bot.
 
-**Última atualização:** 30/12/2025 - Teste automatizado da Fase 1 concluído - Bug de recursão infinita corrigido
+**Última atualização:** 30/12/2025 - Fase 3 implementada e testada - 43/49 testes concluídos
 
 ---
 
@@ -18,7 +18,8 @@ Este documento contém o roteiro completo de testes para validar o funcionamento
 6. [Testes de Integração](#6-testes-de-integração)
 7. [Testes da Fase 1 - Recebimento de Exércitos](#7-testes-da-fase-1---recebimento-de-exércitos)
 8. [Testes da Fase 2 - Ataques](#8-testes-da-fase-2---ataques)
-9. [Checklist de Validação](#9-checklist-de-validação)
+9. [Testes da Fase 3 - Deslocamento de Exércitos](#9-testes-da-fase-3---deslocamento-de-exércitos)
+10. [Checklist de Validação](#10-checklist-de-validação)
 
 ---
 
@@ -949,10 +950,11 @@ Este documento contém o roteiro completo de testes para validar o funcionamento
 - ✅ Resultados são calculados
 - ✅ Mensagem de resultados aparece
 
-**Status:** ⬜ **PENDENTE** - Aguardando implementação da lógica de combate
-- ⚠️ Atualmente o CombatGraph apenas exibe mensagens
-- ⚠️ Método `ResolveCombat()` existe no `WarVikingsState` mas não é chamado pelo grafo
-- ⚠️ Necessário implementar chamada aos métodos do estado no CombatGraph
+**Status:** ✅ **PRONTO PARA TESTE** - Lógica de combate implementada
+- ✅ `ExecuteActionNode` criado para executar ações no estado
+- ✅ Método `ResolveCombat()` é chamado via `ExecuteActionNode` com `ActionId = "resolve_combat"`
+- ✅ Lógica de combate integrada no `CombatGraph`
+- ⚠️ Requer dados de teste no estado (territórios, exércitos) para validação completa
 
 ---
 
@@ -1395,7 +1397,7 @@ Use este checklist enquanto executa os testes:
 
 ## ✅ Resultado Final
 
-**Status Geral:** 🟡 **EM PROGRESSO** (40/45 testes concluídos - 5 testes da Fase 2 pendentes aguardando implementação da lógica de combate)
+**Status Geral:** 🟡 **EM PROGRESSO** (43/49 testes concluídos - 5 testes da Fase 2 prontos para validação com dados de teste)
 
 **Data do Último Teste:** 30/12/2025
 
@@ -1409,8 +1411,8 @@ Use este checklist enquanto executa os testes:
 - ✅ Testes do Sistema de Estado validados via código
 - ✅ Testes de Integração validados via código e testes manuais
 - ✅ Fase 1 - Recebimento de Exércitos: 13/13 testes concluídos
-- ✅ Fase 2 - Ataques: 8/13 testes concluídos (estrutura e navegação)
-- ⚠️ Fase 2 - Ataques: 5/13 testes pendentes (lógica de combate - aguardando implementação)
+- ✅ Fase 2 - Ataques: 8/13 testes concluídos, 5/13 prontos para validação (lógica de combate implementada, requer dados de teste)
+- ✅ Fase 3 - Deslocamento de Exércitos: 4/4 testes concluídos
 
 ### Resumo dos Testes
 
@@ -1423,8 +1425,9 @@ Use este checklist enquanto executa os testes:
 | Sistema de Estado | 2 | 2 | 0 |
 | Integração | 2 | 2 | 0 |
 | Fase 1 - Recebimento de Exércitos | 13 | 13 | 0 |
-| Fase 2 - Ataques | 13 | 8 | 5 |
-| **TOTAL** | **45** | **40** | **5** |
+| Fase 2 - Ataques | 13 | 8 | 5 (prontos para teste) |
+| Fase 3 - Deslocamento de Exércitos | 4 | 4 | 0 |
+| **TOTAL** | **49** | **43** | **5** |
 
 ### Testes Aprovados
 1. ✅ 1.1 Compilação do Projeto
@@ -1454,5 +1457,5 @@ Executar testes manuais seguindo o roteiro acima, começando pela seção "2. Te
 
 ---
 
-**Última atualização:** 30/12/2025 - Teste automatizado da Fase 1 concluído - Bug de recursão infinita corrigido
+**Última atualização:** 30/12/2025 - Fase 3 implementada e testada - 43/49 testes concluídos
 

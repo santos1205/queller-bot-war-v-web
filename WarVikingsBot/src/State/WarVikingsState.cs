@@ -34,6 +34,16 @@ namespace WarVikingsBot.State
         
         public bool IsFirstRound => CurrentRound == 1;
         
+        // Propriedades temporárias para combate atual
+        public string? CurrentCombatSourceTerritory { get; set; }
+        public string? CurrentCombatTargetTerritory { get; set; }
+        public CombatResult? CurrentCombatResult { get; set; }
+        
+        // Propriedades temporárias para deslocamento atual
+        public string? CurrentMovementSourceTerritory { get; set; }
+        public string? CurrentMovementTargetTerritory { get; set; }
+        public int CurrentMovementArmies { get; set; }
+        
         public int GetPlayerTerritoryCount(int playerId)
         {
             return Territories.Values.Count(t => t.OccupiedByPlayer == playerId);
@@ -485,6 +495,110 @@ namespace WarVikingsBot.State
             
             // Garante que não move mais do que tem disponível (deixando pelo menos 1 de ocupação)
             actualMove = Math.Min(actualMove, source.ArmyCount - 1);
+            
+            // Move os exércitos
+            source.ArmyCount -= actualMove;
+            target.ArmyCount += actualMove;
+        }
+        
+        // Métodos para Fase 3: Deslocamento de Exércitos
+        
+        /// <summary>
+        /// Obtém territórios que podem deslocar exércitos (mais de 1 exército, com territórios contíguos do mesmo jogador).
+        /// </summary>
+        public List<string> GetMovementSourceTerritories(int playerId)
+        {
+            var playerTerritories = GetPlayerTerritories(playerId);
+            var sources = new List<string>();
+            
+            foreach (var territoryName in playerTerritories)
+            {
+                if (!Territories.ContainsKey(territoryName))
+                    continue;
+                
+                var territory = Territories[territoryName];
+                // Precisa ter mais de 1 exército (1 de ocupação + pelo menos 1 para mover)
+                if (territory.ArmyCount <= 1)
+                    continue;
+                
+                // Verifica se tem pelo menos um território contíguo do mesmo jogador
+                bool hasAdjacentFriendly = false;
+                foreach (var adjacentName in territory.AdjacentTerritories)
+                {
+                    if (!Territories.ContainsKey(adjacentName))
+                        continue;
+                    
+                    var adjacent = Territories[adjacentName];
+                    if (adjacent.OccupiedByPlayer == playerId)
+                    {
+                        hasAdjacentFriendly = true;
+                        break;
+                    }
+                }
+                
+                if (hasAdjacentFriendly)
+                {
+                    sources.Add(territoryName);
+                }
+            }
+            
+            return sources;
+        }
+        
+        /// <summary>
+        /// Obtém territórios de destino para deslocamento a partir de um território de origem.
+        /// </summary>
+        public List<string> GetMovementTargetTerritories(int playerId, string sourceTerritory)
+        {
+            if (!Territories.ContainsKey(sourceTerritory))
+                return new List<string>();
+            
+            var source = Territories[sourceTerritory];
+            if (source.OccupiedByPlayer != playerId)
+                return new List<string>();
+            
+            var targets = new List<string>();
+            
+            foreach (var adjacentName in source.AdjacentTerritories)
+            {
+                if (!Territories.ContainsKey(adjacentName))
+                    continue;
+                
+                var adjacent = Territories[adjacentName];
+                // Território contíguo do mesmo jogador
+                if (adjacent.OccupiedByPlayer == playerId)
+                {
+                    targets.Add(adjacentName);
+                }
+            }
+            
+            return targets;
+        }
+        
+        /// <summary>
+        /// Executa um deslocamento de exércitos entre dois territórios do mesmo jogador.
+        /// Regra: mínimo 1 exército, deixando pelo menos 1 no território de origem.
+        /// </summary>
+        public void ExecuteMovement(int playerId, string sourceTerritory, string targetTerritory, int armiesToMove)
+        {
+            if (!Territories.ContainsKey(sourceTerritory) || !Territories.ContainsKey(targetTerritory))
+                return;
+            
+            var source = Territories[sourceTerritory];
+            var target = Territories[targetTerritory];
+            
+            if (source.OccupiedByPlayer != playerId || target.OccupiedByPlayer != playerId)
+                return;
+            
+            // Verifica se são contíguos
+            if (!source.AdjacentTerritories.Contains(targetTerritory))
+                return;
+            
+            // Calcula quantos exércitos podem ser movidos (exércitos - 1 de ocupação)
+            int availableArmies = source.ArmyCount - 1;
+            
+            // Limita o movimento: mínimo 1, máximo o disponível
+            int actualMove = Math.Max(1, Math.Min(armiesToMove, availableArmies));
             
             // Move os exércitos
             source.ArmyCount -= actualMove;

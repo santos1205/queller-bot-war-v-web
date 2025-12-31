@@ -60,10 +60,14 @@ namespace WarVikingsBot.Graphs
                 Id = "phase2_show_sources"
             };
             
-            // Pergunta qual território de origem usar (será um MultipleChoiceNode quando implementarmos a seleção)
-            var selectSource = new PerformActionNode("Selecione o território de origem do ataque.")
+            // Define o território de origem (por enquanto, usa o primeiro disponível)
+            // TODO: Implementar seleção real do usuário
+            var setSource = new ExecuteActionNode(
+                "Selecionando território de origem do ataque...",
+                "set_combat_source"
+            )
             {
-                Id = "phase2_select_source"
+                Id = "phase2_set_source"
             };
             
             // Mostra alvos disponíveis
@@ -72,10 +76,14 @@ namespace WarVikingsBot.Graphs
                 Id = "phase2_show_targets"
             };
             
-            // Pergunta qual território atacar (será um MultipleChoiceNode quando implementarmos a seleção)
-            var selectTarget = new PerformActionNode("Selecione o território alvo do ataque.")
+            // Define o território alvo (por enquanto, usa o primeiro disponível)
+            // TODO: Implementar seleção real do usuário
+            var setTarget = new ExecuteActionNode(
+                "Selecionando território alvo do ataque...",
+                "set_combat_target"
+            )
             {
-                Id = "phase2_select_target"
+                Id = "phase2_set_target"
             };
             
             // Chama o grafo de combate
@@ -117,10 +125,10 @@ namespace WarVikingsBot.Graphs
             
             // Se quer atacar, mostra fontes e alvos
             askAttack.TrueNode = showSources;
-            showSources.Next = selectSource;
-            selectSource.Next = showTargets;
-            showTargets.Next = selectTarget;
-            selectTarget.Next = jumpToCombat;
+            showSources.Next = setSource;
+            setSource.Next = showTargets;
+            showTargets.Next = setTarget;
+            setTarget.Next = jumpToCombat;
             
             // Após o combate, volta para perguntar se quer atacar novamente
             jumpToCombat.Next = afterCombat;
@@ -138,9 +146,9 @@ namespace WarVikingsBot.Graphs
                 askAttack,
                 endAttacks,
                 showSources,
-                selectSource,
+                setSource,
                 showTargets,
-                selectTarget,
+                setTarget,
                 jumpToCombat,
                 afterCombat,
                 end
