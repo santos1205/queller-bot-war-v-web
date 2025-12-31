@@ -35,6 +35,10 @@ namespace WarVikingsBot.Crawler
         
         public bool IsAtEnd()
         {
+            // Se há um jump ativo, não é o fim (ainda há grafos para processar)
+            if (_jumpStack.Count > 0)
+                return false;
+            
             return _currentNode is EndNode;
         }
         
@@ -45,6 +49,12 @@ namespace WarVikingsBot.Crawler
         
         public List<string> GetOptions()
         {
+            // Se chegou em um EndNode com jump ativo, não há opções mas ainda há processamento
+            if (_currentNode is EndNode && _jumpStack.Count > 0)
+            {
+                return new List<string>();
+            }
+            
             if (_currentNode is InteractiveNode interactiveNode)
             {
                 return interactiveNode.GetOptions();
@@ -58,6 +68,31 @@ namespace WarVikingsBot.Crawler
             {
                 _options.Add(option);
                 _currentNode = interactiveNode.GetNext(option);
+                AutoCrawl();
+            }
+            else if (_currentNode is EndNode && _jumpStack.Count > 0)
+            {
+                // Processar retorno automático de grafos
+                AutoCrawl();
+            }
+            else if (!IsAtEnd() && !(_currentNode is InteractiveNode))
+            {
+                // Se não está no fim e não é interativo, processar automaticamente
+                // (pode ser um nó não-interativo que precisa ser processado)
+                AutoCrawl();
+            }
+        }
+        
+        /// <summary>
+        /// Força o processamento automático de nós não-interativos.
+        /// Útil quando não há opções mas ainda há processamento a fazer.
+        /// </summary>
+        public void ProcessAutomatic()
+        {
+            // Processar automaticamente apenas se não está no fim E não está em um nó interativo
+            // Se está em um nó interativo, não processar automaticamente (aguardar input do usuário)
+            if (!IsAtEnd() && !(_currentNode is InteractiveNode))
+            {
                 AutoCrawl();
             }
         }
@@ -97,14 +132,54 @@ namespace WarVikingsBot.Crawler
         {
             _messageBuffer = string.Empty;
             
-            while (!IsAtEnd() && _currentNode != null)
+            while (_currentNode != null)
             {
+                // Se chegou em um EndNode e há um jump ativo, retornar automaticamente ANTES de verificar IsAtEnd()
+                if (_currentNode is EndNode && _jumpStack.Count > 0)
+                {
+                    AddToMessageBuffer(_currentNode);
+                    var returnNode = HandleReturn();
+                    if (returnNode != null)
+                    {
+                        _currentNode = returnNode;
+                        // Se o nó retornado é um JumpToGraphNode, processar imediatamente
+                        if (_currentNode is JumpToGraphNode nextJump)
+                        {
+                            HandleJump(nextJump);
+                            // Continuar processando o grafo destino
+                            continue;
+                        }
+                        // Se não é um JumpToGraphNode, continuar processando o nó retornado
+                        continue;
+                    }
+                    // Se não há retorno, é o fim real
+                    break;
+                }
+                
+                // Se chegou em um EndNode sem jump ativo, é o fim real
+                if (IsAtEnd())
+                    break;
+                
                 AddToMessageBuffer(_currentNode);
                 
                 // Executar ação se for ExecuteActionNode
                 if (_currentNode is ExecuteActionNode executeNode)
                 {
                     ExecuteAction(executeNode);
+                }
+                
+                // Verificar se é BinaryConditionNode com condições automáticas
+                if (_currentNode is BinaryConditionNode binaryNode)
+                {
+                    var autoResult = EvaluateAutoCondition(binaryNode);
+                    if (autoResult.HasValue)
+                    {
+                        // Condição automática - seguir automaticamente
+                        _currentNode = autoResult.Value ? binaryNode.TrueNode : binaryNode.FalseNode;
+                        continue;
+                    }
+                    // Se não for automática, para e aguarda interação do usuário
+                    break;
                 }
                 
                 if (_currentNode is InteractiveNode)
@@ -122,6 +197,42 @@ namespace WarVikingsBot.Crawler
                 
                 _currentNode = GetNextNode(_currentNode);
             }
+        }
+        
+        /// <summary>
+        /// Avalia condições que podem ser resolvidas automaticamente pelo estado.
+        /// Retorna null se a condição precisa de interação do usuário.
+        /// </summary>
+        private bool? EvaluateAutoCondition(BinaryConditionNode node)
+        {
+            var condition = node.Condition.ToLower();
+            var playerId = _state.CurrentPlayer;
+            
+            // Verificar condições conhecidas
+            if (condition.Contains("primeira rodada") || condition.Contains("é a primeira rodada"))
+            {
+                return _state.IsFirstRound;
+            }
+            
+            if (condition.Contains("check_first_round"))
+            {
+                return _state.IsFirstRound;
+            }
+            
+            if (condition.Contains("check_conquered_this_turn"))
+            {
+                return _state.HasConqueredTerritoryThisTurn(playerId);
+            }
+            
+            // Verificar se tem territórios que podem atacar
+            if (condition.Contains("territórios que podem atacar") || condition.Contains("territorios que podem atacar"))
+            {
+                var sources = _state.GetAttackSourceTerritories(playerId);
+                return sources.Count > 0;
+            }
+            
+            // Se não for uma condição automática, retorna null para aguardar interação
+            return null;
         }
         
         private void ExecuteAction(ExecuteActionNode node)
@@ -244,6 +355,22 @@ namespace WarVikingsBot.Crawler
                     }
                     break;
                     
+                case "receive_territory_card":
+                    // Recebe uma carta de território
+                    // Por enquanto, recebe uma carta do primeiro território conquistado
+                    // TODO: Implementar seleção real do território
+                    var conquered = state.GetConqueredTerritoriesThisTurn(playerId);
+                    if (conquered.Count > 0)
+                    {
+                        state.ReceiveTerritoryCard(playerId, conquered[0]);
+                    }
+                    break;
+                    
+                case "clear_conquered_territories":
+                    // Limpa o rastreamento de conquistas do turno anterior
+                    state.ClearConqueredTerritoriesThisTurn(playerId);
+                    break;
+                    
                 default:
                     // Ação desconhecida - não faz nada
                     break;
@@ -263,6 +390,10 @@ namespace WarVikingsBot.Crawler
             else if (node is ReturnFromGraphNode returnNode)
             {
                 _messageBuffer += returnNode.GetMessage() + "\n";
+            }
+            else if (node is PerformActionNode performNode)
+            {
+                _messageBuffer += performNode.GetMessage() + "\n";
             }
         }
         

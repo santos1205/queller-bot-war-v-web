@@ -21,7 +21,11 @@ namespace WarVikingsBot.Cli
         {
             while (!_crawler.IsAtEnd())
             {
-                // Exibir mensagem atual
+                // PRIMEIRO: Processar automaticamente qualquer coisa que precise ser processada
+                // Isso garante que EndNodes com jump ativo sejam processados ANTES de verificar opções
+                _crawler.ProcessAutomatic();
+                
+                // Exibir mensagem atual (após processamento automático)
                 var message = _crawler.GetMessage();
                 if (!string.IsNullOrWhiteSpace(message))
                 {
@@ -29,7 +33,7 @@ namespace WarVikingsBot.Cli
                     Console.WriteLine(message.Trim());
                 }
                 
-                // Obter opções disponíveis
+                // Obter opções disponíveis (após processamento automático)
                 var options = _crawler.GetOptions();
                 
                 if (options.Count > 0)
@@ -52,7 +56,16 @@ namespace WarVikingsBot.Cli
                 }
                 else
                 {
-                    // Sem opções, apenas aguardar Enter
+                    // Sem opções - pode ser EndNode com jump ativo ou fim real
+                    // Se não está no fim, processar automaticamente novamente (pode haver mais processamento)
+                    if (!_crawler.IsAtEnd())
+                    {
+                        // Processar automaticamente novamente (pode haver mais retornos de grafos)
+                        _crawler.ProcessAutomatic();
+                        // Continuar o loop para verificar novamente
+                        continue;
+                    }
+                    // Se está no fim, apenas aguardar Enter
                     Console.WriteLine("\n[Pressione Enter para continuar]");
                     Console.ReadLine();
                 }

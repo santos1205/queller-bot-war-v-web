@@ -28,9 +28,9 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 | Interface CLI | 🟢 Completo | 100% |
 | Grafo de Teste | 🟢 Completo | 100% |
 | Fase 1 - Recebimento de Exércitos | 🟢 Completo | 100% |
-| Fase 2 - Ataques | 🟡 Em Progresso | 80% |
+| Fase 2 - Ataques | 🟡 Em Progresso | 92% |
 | Fase 3 - Deslocamento de Exércitos | 🟢 Completo | 100% |
-| Sistema de Combate | 🟡 Em Progresso | 70% |
+| Sistema de Combate | 🟡 Em Progresso | 83% |
 | Mecânicas Especiais | 🟡 Em Progresso | 20% |
 | Documentação | 🟡 Em Progresso | 70% |
 

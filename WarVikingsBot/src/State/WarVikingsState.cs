@@ -44,6 +44,9 @@ namespace WarVikingsBot.State
         public string? CurrentMovementTargetTerritory { get; set; }
         public int CurrentMovementArmies { get; set; }
         
+        // Rastreamento de conquistas no turno atual
+        public Dictionary<int, List<string>> ConqueredTerritoriesThisTurn { get; set; } = new Dictionary<int, List<string>>();
+        
         public int GetPlayerTerritoryCount(int playerId)
         {
             return Territories.Values.Count(t => t.OccupiedByPlayer == playerId);
@@ -468,6 +471,16 @@ namespace WarVikingsBot.State
                 {
                     target.OccupiedByPlayer = attackerId;
                     target.ArmyCount = 0; // Será preenchido pelo movimento de exércitos
+                    
+                    // Registra a conquista no turno atual
+                    if (!ConqueredTerritoriesThisTurn.ContainsKey(attackerId))
+                    {
+                        ConqueredTerritoriesThisTurn[attackerId] = new List<string>();
+                    }
+                    if (!ConqueredTerritoriesThisTurn[attackerId].Contains(targetTerritory))
+                    {
+                        ConqueredTerritoriesThisTurn[attackerId].Add(targetTerritory);
+                    }
                 }
             }
         }
@@ -603,6 +616,112 @@ namespace WarVikingsBot.State
             // Move os exércitos
             source.ArmyCount -= actualMove;
             target.ArmyCount += actualMove;
+        }
+        
+        // Métodos para Fase 4: Recebimento de Carta de Território
+        
+        /// <summary>
+        /// Verifica se o jogador conquistou pelo menos um território adversário neste turno.
+        /// </summary>
+        public bool HasConqueredTerritoryThisTurn(int playerId)
+        {
+            if (!ConqueredTerritoriesThisTurn.ContainsKey(playerId))
+                return false;
+            
+            return ConqueredTerritoriesThisTurn[playerId].Count > 0;
+        }
+        
+        /// <summary>
+        /// Obtém lista de territórios conquistados neste turno.
+        /// </summary>
+        public List<string> GetConqueredTerritoriesThisTurn(int playerId)
+        {
+            if (!ConqueredTerritoriesThisTurn.ContainsKey(playerId))
+                return new List<string>();
+            
+            return new List<string>(ConqueredTerritoriesThisTurn[playerId]);
+        }
+        
+        /// <summary>
+        /// Recebe uma carta de território para o jogador.
+        /// Por enquanto, adiciona uma carta genérica (será implementado sistema completo de cartas depois).
+        /// </summary>
+        public void ReceiveTerritoryCard(int playerId, string territoryName)
+        {
+            if (!TerritoryCards.ContainsKey(playerId))
+            {
+                TerritoryCards[playerId] = new List<string>();
+            }
+            
+            // Por enquanto, adiciona o nome do território como carta
+            // TODO: Implementar sistema completo de cartas com figuras
+            TerritoryCards[playerId].Add(territoryName);
+        }
+        
+        /// <summary>
+        /// Limpa o rastreamento de conquistas do turno atual (chamado no início de cada turno).
+        /// </summary>
+        public void ClearConqueredTerritoriesThisTurn(int playerId)
+        {
+            if (ConqueredTerritoriesThisTurn.ContainsKey(playerId))
+            {
+                ConqueredTerritoriesThisTurn[playerId].Clear();
+            }
+        }
+        
+        /// <summary>
+        /// Prepara o estado para um novo turno (limpa conquistas, incrementa rodada se necessário).
+        /// </summary>
+        public void PrepareNewTurn(int playerId)
+        {
+            // Limpa conquistas do turno anterior
+            ClearConqueredTerritoriesThisTurn(playerId);
+            
+            // TODO: Incrementar rodada quando necessário
+            // Por enquanto, apenas limpa as conquistas
+        }
+        
+        /// <summary>
+        /// Inicializa dados de teste para permitir testar o sistema de combate.
+        /// Cria 2 territórios adjacentes: um do jogador 1 (com 3 exércitos) e um do jogador 2 (com 2 exércitos).
+        /// </summary>
+        public void InitializeTestData()
+        {
+            // Limpar dados existentes
+            Territories.Clear();
+            ConqueredTerritoriesThisTurn.Clear();
+            
+            // Criar território 1 (do jogador 1) - pode atacar
+            var territory1 = new Territory
+            {
+                Name = "Território Teste 1",
+                Type = TerritoryType.SemPorto,
+                OccupiedByPlayer = 1,
+                ArmyCount = 3, // Pode atacar (>= 2)
+                Region = "Região Teste"
+            };
+            
+            // Criar território 2 (do jogador 2) - pode ser atacado
+            var territory2 = new Territory
+            {
+                Name = "Território Teste 2",
+                Type = TerritoryType.SemPorto,
+                OccupiedByPlayer = 2,
+                ArmyCount = 2, // Pode ser atacado
+                Region = "Região Teste"
+            };
+            
+            // Conectar os territórios (adjacentes)
+            territory1.AdjacentTerritories.Add(territory2.Name);
+            territory2.AdjacentTerritories.Add(territory1.Name);
+            
+            // Adicionar ao dicionário
+            Territories[territory1.Name] = territory1;
+            Territories[territory2.Name] = territory2;
+            
+            // Definir territórios de combate para teste
+            CurrentCombatSourceTerritory = territory1.Name;
+            CurrentCombatTargetTerritory = territory2.Name;
         }
     }
 }

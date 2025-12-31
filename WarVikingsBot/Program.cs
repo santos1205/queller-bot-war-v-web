@@ -26,6 +26,23 @@ namespace WarVikingsBot
             {
                 // Criar estado inicial do jogo
                 var state = new WarVikingsState();
+                state.CurrentPlayer = 1; // Jogador 1 inicia
+                
+                // Verificar se deve usar dados de teste (via variável de ambiente ou argumento)
+                bool useTestData = Environment.GetEnvironmentVariable("USE_TEST_DATA") == "true" ||
+                                 (args.Length > 0 && args[0] == "--test-data");
+                
+                if (useTestData)
+                {
+                    state.CurrentRound = 2; // Rodada 2 para permitir ataques
+                    state.InitializeTestData();
+                    Console.WriteLine("⚠️  MODO DE TESTE ATIVADO: Dados de teste inicializados.");
+                    Console.WriteLine();
+                }
+                else
+                {
+                    state.CurrentRound = 1; // Primeira rodada
+                }
                 
                 // Criar e registrar grafos
                 var graphs = new Dictionary<string, Graph>();
@@ -54,8 +71,16 @@ namespace WarVikingsBot
                 var phase3Graph = Phase3Graph.Create();
                 graphs[phase3Graph.Id] = phase3Graph;
                 
-                // Criar GraphCrawler com o grafo da Fase 1 (ou test_graph para testes)
-                var crawler = new GraphCrawler("phase_1", graphs, state);
+                // Grafo da Fase 4 - Recebimento de Carta de Território
+                var phase4Graph = Phase4Graph.Create();
+                graphs[phase4Graph.Id] = phase4Graph;
+                
+                // Grafo principal do turno - conecta todas as fases
+                var turnGraph = TurnGraph.Create();
+                graphs[turnGraph.Id] = turnGraph;
+                
+                // Criar GraphCrawler com o grafo principal do turno
+                var crawler = new GraphCrawler("turn", graphs, state);
                 
                 // Criar e executar interface CLI
                 var cli = new CliInterface(crawler);
