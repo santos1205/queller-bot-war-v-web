@@ -949,12 +949,10 @@ Este documento contém o roteiro completo de testes para validar o funcionamento
 - ✅ Resultados são calculados
 - ✅ Mensagem de resultados aparece
 
-**Status:** ✅ **CONCLUÍDO** - 30/12/2025 (via script automatizado)
-- ✅ Mensagem "FASE 2: ATAQUES" aparece
-- ✅ Pergunta sobre primeira rodada funciona
-- ✅ Mensagem "Primeira rodada: não há ataques" aparece quando respondido `true`
-- ✅ Fase 2 termina corretamente
-- ✅ Teste automatizado passou
+**Status:** ⬜ **PENDENTE** - Aguardando implementação da lógica de combate
+- ⚠️ Atualmente o CombatGraph apenas exibe mensagens
+- ⚠️ Método `ResolveCombat()` existe no `WarVikingsState` mas não é chamado pelo grafo
+- ⚠️ Necessário implementar chamada aos métodos do estado no CombatGraph
 
 ---
 
@@ -974,12 +972,10 @@ Este documento contém o roteiro completo de testes para validar o funcionamento
 - ✅ Perdas são calculadas
 - ✅ Mensagem de perdas aparece
 
-**Status:** ✅ **CONCLUÍDO** - 30/12/2025 (via script automatizado)
-- ✅ Mensagem "FASE 2: ATAQUES" aparece
-- ✅ Pergunta sobre primeira rodada funciona
-- ✅ Mensagem "Primeira rodada: não há ataques" aparece quando respondido `true`
-- ✅ Fase 2 termina corretamente
-- ✅ Teste automatizado passou
+**Status:** ⬜ **PENDENTE** - Aguardando implementação da lógica de combate
+- ⚠️ Atualmente o CombatGraph apenas exibe mensagens
+- ⚠️ Método `ResolveCombat()` calcula comparações mas não é chamado pelo grafo
+- ⚠️ Necessário implementar chamada aos métodos do estado no CombatGraph
 
 ---
 
@@ -998,12 +994,10 @@ Este documento contém o roteiro completo de testes para validar o funcionamento
 - ✅ Estado do jogo é atualizado
 - ✅ Territórios refletem as perdas
 
-**Status:** ✅ **CONCLUÍDO** - 30/12/2025 (via script automatizado)
-- ✅ Mensagem "FASE 2: ATAQUES" aparece
-- ✅ Pergunta sobre primeira rodada funciona
-- ✅ Mensagem "Primeira rodada: não há ataques" aparece quando respondido `true`
-- ✅ Fase 2 termina corretamente
-- ✅ Teste automatizado passou
+**Status:** ⬜ **PENDENTE** - Aguardando implementação da lógica de combate
+- ⚠️ Atualmente o CombatGraph apenas exibe mensagens
+- ⚠️ Método `ApplyCombatLosses()` existe no `WarVikingsState` mas não é chamado pelo grafo
+- ⚠️ Necessário implementar chamada aos métodos do estado no CombatGraph
 
 ---
 
@@ -1023,12 +1017,10 @@ Este documento contém o roteiro completo de testes para validar o funcionamento
 - ✅ Pergunta sobre movimento de exércitos aparece
 - ✅ Território é transferido para o atacante
 
-**Status:** ✅ **CONCLUÍDO** - 30/12/2025 (via script automatizado)
-- ✅ Mensagem "FASE 2: ATAQUES" aparece
-- ✅ Pergunta sobre primeira rodada funciona
-- ✅ Mensagem "Primeira rodada: não há ataques" aparece quando respondido `true`
-- ✅ Fase 2 termina corretamente
-- ✅ Teste automatizado passou
+**Status:** ⬜ **PENDENTE** - Aguardando implementação da lógica de combate
+- ⚠️ Atualmente o CombatGraph apenas exibe mensagens
+- ⚠️ Método `ApplyCombatLosses()` transfere território mas não é chamado pelo grafo
+- ⚠️ Necessário implementar chamada aos métodos do estado no CombatGraph
 
 ---
 
@@ -1047,12 +1039,10 @@ Este documento contém o roteiro completo de testes para validar o funcionamento
 - ✅ Território de origem mantém pelo menos 1 exército
 - ✅ Território conquistado recebe os exércitos
 
-**Status:** ✅ **CONCLUÍDO** - 30/12/2025 (via script automatizado)
-- ✅ Mensagem "FASE 2: ATAQUES" aparece
-- ✅ Pergunta sobre primeira rodada funciona
-- ✅ Mensagem "Primeira rodada: não há ataques" aparece quando respondido `true`
-- ✅ Fase 2 termina corretamente
-- ✅ Teste automatizado passou
+**Status:** ⬜ **PENDENTE** - Aguardando implementação da lógica de combate
+- ⚠️ Atualmente o CombatGraph apenas exibe mensagens
+- ⚠️ Método `MoveArmiesAfterConquest()` existe no `WarVikingsState` mas não é chamado pelo grafo
+- ⚠️ Necessário implementar chamada aos métodos do estado no CombatGraph
 
 ---
 
@@ -1405,7 +1395,7 @@ Use este checklist enquanto executa os testes:
 
 ## ✅ Resultado Final
 
-**Status Geral:** 🟡 **EM PROGRESSO** (19/19 testes base concluídos - 13 testes da Fase 1 pendentes)
+**Status Geral:** 🟡 **EM PROGRESSO** (40/45 testes concluídos - 5 testes da Fase 2 pendentes aguardando implementação da lógica de combate)
 
 **Data do Último Teste:** 30/12/2025
 
@@ -1418,7 +1408,9 @@ Use este checklist enquanto executa os testes:
 - ✅ Testes do GraphCrawler validados via código e testes manuais
 - ✅ Testes do Sistema de Estado validados via código
 - ✅ Testes de Integração validados via código e testes manuais
-- ✅ Sistema completamente validado e funcionando corretamente
+- ✅ Fase 1 - Recebimento de Exércitos: 13/13 testes concluídos
+- ✅ Fase 2 - Ataques: 8/13 testes concluídos (estrutura e navegação)
+- ⚠️ Fase 2 - Ataques: 5/13 testes pendentes (lógica de combate - aguardando implementação)
 
 ### Resumo dos Testes
 
@@ -1430,7 +1422,9 @@ Use este checklist enquanto executa os testes:
 | GraphCrawler | 3 | 3 | 0 |
 | Sistema de Estado | 2 | 2 | 0 |
 | Integração | 2 | 2 | 0 |
-| **TOTAL** | **19** | **19** | **0** |
+| Fase 1 - Recebimento de Exércitos | 13 | 13 | 0 |
+| Fase 2 - Ataques | 13 | 8 | 5 |
+| **TOTAL** | **45** | **40** | **5** |
 
 ### Testes Aprovados
 1. ✅ 1.1 Compilação do Projeto
