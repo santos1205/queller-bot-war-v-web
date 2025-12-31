@@ -13,7 +13,7 @@ namespace WarVikingsBot.Graphs
         
         public string GetMessage()
         {
-            return "Continue from where you jumped to this graph.";
+            return string.Empty; // Mensagem vazia - ReturnFromGraphNode é apenas um marcador interno
         }
     }
 }

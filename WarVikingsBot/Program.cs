@@ -29,11 +29,29 @@ namespace WarVikingsBot
                 
                 // Criar e registrar grafos
                 var graphs = new Dictionary<string, Graph>();
+                
+                // Grafo de teste
                 var testGraph = TestGraph.Create();
                 graphs[testGraph.Id] = testGraph;
                 
-                // Criar GraphCrawler com o grafo de teste
-                var crawler = new GraphCrawler("test_graph", graphs, state);
+                // Grafo da Fase 1 - Recebimento de Exércitos
+                var phase1Graph = Phase1Graph.Create();
+                graphs[phase1Graph.Id] = phase1Graph;
+                
+                // Grafo de Troca de Cartas
+                var cardTradeGraph = CardTradeGraph.Create();
+                graphs[cardTradeGraph.Id] = cardTradeGraph;
+                
+                // Grafo da Fase 2 - Ataques
+                var phase2Graph = Phase2Graph.Create();
+                graphs[phase2Graph.Id] = phase2Graph;
+                
+                // Grafo de Combate
+                var combatGraph = CombatGraph.Create();
+                graphs[combatGraph.Id] = combatGraph;
+                
+                // Criar GraphCrawler com o grafo da Fase 1 (ou test_graph para testes)
+                var crawler = new GraphCrawler("phase_1", graphs, state);
                 
                 // Criar e executar interface CLI
                 var cli = new CliInterface(crawler);

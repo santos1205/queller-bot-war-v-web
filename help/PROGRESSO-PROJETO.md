@@ -27,9 +27,10 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 | GraphCrawler | 🟢 Completo | 100% |
 | Interface CLI | 🟢 Completo | 100% |
 | Grafo de Teste | 🟢 Completo | 100% |
+| Fase 1 - Recebimento de Exércitos | 🟢 Completo | 100% |
 | Sistema de Combate | ⬜ Não Iniciado | 0% |
-| Mecânicas Especiais | ⬜ Não Iniciado | 0% |
-| Documentação | 🟡 Em Progresso | 60% |
+| Mecânicas Especiais | 🟡 Em Progresso | 20% |
+| Documentação | 🟡 Em Progresso | 70% |
 
 **Legenda:**
 - 🟢 Completo
@@ -68,12 +69,13 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [x] Criar classe `WarVikingsState` (equivalente a `QuellerState`)
 - [x] Implementar rastreamento de territórios
 - [x] Implementar rastreamento de exércitos por território
-- [ ] Implementar rastreamento de regiões conquistadas
+- [x] Implementar rastreamento de regiões conquistadas
 - [x] Implementar rastreamento de cartas de território
 - [x] Implementar rastreamento de cartas-objetivo
 - [x] Implementar rastreamento de exércitos no Valhalla (máx 6)
 - [x] Implementar rastreamento de navios de guerra (máx 5)
 - [x] Implementar rastreamento de comandante
+- [x] Implementar rastreamento de trocas de cartas (progressivo)
 
 #### 2.2 Efeito de Comando
 - [x] Criar enum `CommandEffectType` (Grito de Batalha, Águas Sangrentas, Parede de Escudos, Prece da Guerra)
@@ -122,12 +124,12 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Criar novos tipos de nós específicos se necessário
 
 #### 4.2 Fases do Turno
-- [ ] **Fase 1: Recebimento de Exércitos**
-  - [ ] Calcular exércitos por territórios (÷2, min 3)
-  - [ ] Calcular exércitos por regiões conquistadas
-  - [ ] Verificar necessidade de troca de cartas (5+ cartas)
-  - [ ] Implementar troca de cartas (3 iguais ou 3 diferentes)
-  - [ ] Alocar exércitos recebidos
+- [x] **Fase 1: Recebimento de Exércitos**
+  - [x] Calcular exércitos por territórios (÷2, min 3)
+  - [x] Calcular exércitos por regiões conquistadas
+  - [x] Verificar necessidade de troca de cartas (5+ cartas)
+  - [x] Implementar troca de cartas (3 iguais ou 3 diferentes)
+  - [ ] Alocar exércitos recebidos (interface de alocação pendente)
 
 - [ ] **Fase 2: Ataques**
   - [ ] Identificar territórios atacáveis (contíguos, min 2 exércitos)
@@ -173,11 +175,11 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
   - [ ] Aplicação de efeito na rolagem
   - [ ] Segunda rolagem (se necessário)
 
-- [ ] **CardTradeGraph.cs** ou **troca-cartas.json** - Sistema de troca de cartas
-  - [ ] Verificação de 3 cartas iguais
-  - [ ] Verificação de 3 cartas diferentes
-  - [ ] Cálculo de exércitos progressivos (4, 6, 8, 10...)
-  - [ ] Forçar troca se 5+ cartas
+- [x] **CardTradeGraph.cs** - Sistema de troca de cartas
+  - [x] Verificação de 3 cartas iguais
+  - [x] Verificação de 3 cartas diferentes
+  - [x] Cálculo de exércitos progressivos (4, 6, 8, 10...)
+  - [x] Forçar troca se 5+ cartas (integrado no Phase1Graph)
 
 [↑ Voltar ao topo](#-visão-geral)
 
@@ -378,9 +380,9 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 
 ### Fase 3: Mecânicas Principais
 - [ ] Implementar sistema de combate
-- [ ] Implementar recebimento de exércitos
-- [ ] Implementar sistema de cartas
-- [ ] Implementar Valhalla
+- [x] Implementar recebimento de exércitos (Fase 1 completa)
+- [x] Implementar sistema de cartas (troca de cartas implementada)
+- [ ] Implementar Valhalla (estrutura base pronta, falta lógica de invocação)
 
 ### Fase 4: Grafos Completos
 - [ ] Implementar todas as fases do turno
@@ -522,6 +524,19 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
   - ✅ Testes de Integração (validação via código + testes manuais)
   - ✅ Sistema completamente validado e pronto para implementação das mecânicas do jogo
 
+### 30/12/2025 - Fase 1 - Recebimento de Exércitos Implementada
+- **Data:** 30/12/2025
+- **Ação:** Implementação completa da Fase 1 do turno
+- **Status:**
+  - ✅ Métodos adicionados no `WarVikingsState` para cálculo de exércitos por regiões
+  - ✅ Métodos adicionados para verificação e processamento de troca de cartas
+  - ✅ `Phase1Graph.cs` criado e implementado
+  - ✅ `CardTradeGraph.cs` criado como sub-grafo de troca de cartas
+  - ✅ Grafos integrados no `Program.cs`
+  - ✅ Sistema compilando sem erros
+  - 📝 Documentação atualizada (`EXPLICACAO-PROJETO.md` e `PROGRESSO-PROJETO.md`)
+  - ⚠️ Alocação de exércitos ainda requer interface de seleção de territórios
+
 [↑ Voltar ao topo](#-visão-geral)
 
 ---
@@ -547,6 +562,6 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 
 ---
 
-**Última atualização:** 30/12/2025 - Testes Completos (100%)  
+**Última atualização:** 30/12/2025 - Fase 1 - Recebimento de Exércitos Implementada  
 **Mantido por:** Equipe de Desenvolvimento War Vikings Bot
 

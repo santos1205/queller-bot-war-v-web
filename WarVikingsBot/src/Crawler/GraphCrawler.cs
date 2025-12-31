@@ -104,6 +104,16 @@ namespace WarVikingsBot.Crawler
                 if (_currentNode is InteractiveNode)
                     break;
                 
+                // Verificar se é JumpToGraphNode antes de chamar GetNextNode
+                // porque HandleJump já atualiza _currentNode
+                if (_currentNode is JumpToGraphNode jumpNode)
+                {
+                    HandleJump(jumpNode);
+                    // _currentNode já foi atualizado para o root do grafo destino
+                    // Continuar o loop para processar o novo nó
+                    continue;
+                }
+                
                 _currentNode = GetNextNode(_currentNode);
             }
         }
@@ -128,19 +138,15 @@ namespace WarVikingsBot.Crawler
         {
             if (node is NonInteractiveNode nonInteractiveNode)
             {
-                var next = nonInteractiveNode.GetNext();
-                
-                if (node is JumpToGraphNode jumpNode)
-                {
-                    HandleJump(jumpNode);
-                    return GetNextNode(jumpNode);
-                }
+                // JumpToGraphNode é tratado diretamente em AutoCrawl()
+                // para evitar recursão infinita
                 
                 if (node is ReturnFromGraphNode)
                 {
                     return HandleReturn();
                 }
                 
+                var next = nonInteractiveNode.GetNext();
                 return next;
             }
             

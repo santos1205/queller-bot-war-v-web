@@ -16,6 +16,7 @@ Este documento contém explicações detalhadas de cada componente implementado 
 3. [Sistema de Estado (WarVikingsState)](#3-sistema-de-estado-warvikingsstate)
 4. [Classes Base de Grafos de Decisão](#4-classes-base-de-grafos-de-decisão)
 5. [GraphCrawler - Navegador de Grafos](#5-graphcrawler---navegador-de-grafos)
+6. [Grafos de Fase do Turno](#6-grafos-de-fase-do-turno)
 
 ---
 
@@ -327,6 +328,136 @@ Verifica se o comandante do jogador está no território especificado.
 **Regra implementada:** (regras.md, linha 91)
 > "Os Efeitos de Comando são utilizados exclusivamente em combates que envolvam territórios onde o Comandante do jogador está presente."
 
+#### `GetConqueredRegions(int playerId)`
+
+**Lógica:**
+```csharp
+var allRegions = Territories.Values.Select(t => t.Region).Distinct().ToList();
+foreach (var region in allRegions)
+{
+    var regionTerritories = Territories.Values.Where(t => t.Region == region).ToList();
+    bool allConquered = regionTerritories.All(t => t.OccupiedByPlayer == playerId);
+    if (allConquered)
+        conqueredRegions.Add(region);
+}
+```
+
+1. Obtém todas as regiões únicas do tabuleiro
+2. Para cada região, verifica se todos os territórios pertencem ao jogador
+3. Retorna lista de regiões completamente conquistadas
+
+**Regra implementada:** (regras.md, linha 47)
+> "Recebe exércitos extras se possuir uma Região inteira (valor conforme a tabela no tabuleiro)."
+
+#### `CalculateArmiesFromRegions(int playerId)`
+
+**Lógica:**
+```csharp
+var conqueredRegions = GetConqueredRegions(playerId);
+int totalArmies = 0;
+foreach (var region in conqueredRegions)
+{
+    totalArmies += 2; // Valor temporário - será substituído por valores da tabela
+}
+return totalArmies;
+```
+
+1. Obtém todas as regiões conquistadas
+2. Para cada região, adiciona exércitos (valores temporários, aguardando tabela do tabuleiro)
+3. Retorna total de exércitos por regiões
+
+**Regra implementada:** (regras.md, linha 47)
+> "Recebe exércitos extras se possuir uma Região inteira (valor conforme a tabela no tabuleiro). Estes exércitos devem ser distribuídos obrigatoriamente nesta Região."
+
+**Nota:** Valores atuais são temporários (2 exércitos por região). Serão substituídos pelos valores reais da tabela do tabuleiro.
+
+#### `CanTradeCards(int playerId)`
+
+**Lógica:**
+```csharp
+return GetTerritoryCardCount(playerId) >= 3;
+```
+
+Verifica se o jogador tem pelo menos 3 cartas (mínimo necessário para trocar).
+
+**Regra implementada:** (regras.md, linha 48)
+> "A troca de cartas (3 cartas com figuras iguais ou 3 cartas com figuras diferentes) garante exércitos."
+
+#### `HasThreeSameCards(int playerId)`
+
+**Lógica:**
+```csharp
+var cards = TerritoryCards[playerId];
+var grouped = cards.GroupBy(c => c);
+return grouped.Any(g => g.Count() >= 3);
+```
+
+1. Obtém cartas do jogador
+2. Agrupa cartas por nome
+3. Verifica se algum grupo tem 3 ou mais cartas iguais
+
+**Regra implementada:** (regras.md, linha 48)
+> "A troca de cartas (3 cartas com figuras iguais ou 3 cartas com figuras diferentes) garante exércitos."
+
+#### `HasThreeDifferentCards(int playerId)`
+
+**Lógica:**
+```csharp
+var cards = TerritoryCards[playerId];
+return cards.Distinct().Count() >= 3;
+```
+
+1. Obtém cartas do jogador
+2. Conta quantas cartas diferentes existem
+3. Retorna `true` se há pelo menos 3 cartas diferentes
+
+**Regra implementada:** (regras.md, linha 48)
+> "A troca de cartas (3 cartas com figuras iguais ou 3 cartas com figuras diferentes) garante exércitos."
+
+#### `GetNextCardTradeArmies(int playerId)`
+
+**Lógica:**
+```csharp
+var tradeCount = CardTradeCount.ContainsKey(playerId) ? CardTradeCount[playerId] : 0;
+return 4 + (tradeCount * 2);
+```
+
+Calcula exércitos da próxima troca usando valores progressivos:
+- 1ª troca: 4 exércitos
+- 2ª troca: 6 exércitos
+- 3ª troca: 8 exércitos
+- 4ª troca: 10 exércitos
+- E assim por diante...
+
+**Regra implementada:** (regras.md, linha 48)
+> "Os valores de exércitos por troca são progressivos (4, 6, 8, 10, etc.)."
+
+#### `GetTradeableCards(int playerId)`
+
+**Lógica:**
+```csharp
+// Verifica 3 cartas iguais
+var grouped = cards.GroupBy(c => c);
+foreach (var group in grouped)
+{
+    if (group.Count() >= 3)
+        tradeable.AddRange(group.Take(3));
+}
+
+// Se não tem 3 iguais, verifica 3 diferentes
+if (tradeable.Count == 0 && cards.Distinct().Count() >= 3)
+{
+    tradeable.AddRange(cards.Distinct().Take(3));
+}
+```
+
+1. Primeiro verifica se há 3 cartas iguais
+2. Se não encontrar, verifica se há 3 cartas diferentes
+3. Retorna lista de cartas que podem ser trocadas
+
+**Regra implementada:** (regras.md, linha 48)
+> "A troca de cartas (3 cartas com figuras iguais ou 3 cartas com figuras diferentes) garante exércitos."
+
 ### Resumo das Regras Implementadas
 
 | Regra | Método | Status |
@@ -338,6 +469,10 @@ Verifica se o comandante do jogador está no território especificado.
 | Construção de navios (1 exército Valhalla, máx 5 navios) | `CanBuildShip()` | ✅ |
 | Efeito de comando (comandante presente) | `CanUseCommandEffect()` | ✅ |
 | Primeira rodada (sem ataques) | `IsFirstRound` | ✅ |
+| Regiões conquistadas | `GetConqueredRegions()`, `CalculateArmiesFromRegions()` | ✅ |
+| Verificação de troca de cartas | `CanTradeCards()`, `HasThreeSameCards()`, `HasThreeDifferentCards()` | ✅ |
+| Cálculo de exércitos por troca (progressivo) | `GetNextCardTradeArmies()` | ✅ |
+| Lista de cartas trocáveis | `GetTradeableCards()` | ✅ |
 
 [↑ Voltar ao topo](#-índice)
 
@@ -807,5 +942,107 @@ Este documento será atualizado continuamente conforme novas funcionalidades sã
 
 ---
 
-**Última atualização:** 30/12/2025 - Etapa 5 - GraphCrawler - Navegador de Grafos + Testes Completos
+---
+
+## 6. Grafos de Fase do Turno
+
+### O que foi implementado
+
+Implementação dos grafos que representam as fases do turno do jogo War Vikings. Cada fase é um grafo separado que guia o jogador através das ações necessárias.
+
+### Phase1Graph - Fase 1: Recebimento de Exércitos
+
+#### Estrutura do Grafo
+
+O grafo `Phase1Graph` implementa a primeira fase do turno, onde o jogador recebe novos exércitos de três fontes:
+1. **Territórios possuídos** (÷2, mínimo 3)
+2. **Regiões conquistadas** (valores da tabela)
+3. **Troca de cartas** (progressivo: 4, 6, 8, 10...)
+
+#### Fluxo do Grafo
+
+```
+StartNode
+  ↓
+PerformActionNode: "FASE 1: RECEBIMENTO DE EXÉRCITOS"
+  ↓
+BinaryConditionNode: "Você tem 5 ou mais cartas?"
+  ├─ true → PerformActionNode: "Você DEVE trocar cartas"
+  │         ↓
+  │         JumpToGraphNode("card_trade")
+  │         ↓
+  └─ false → BinaryConditionNode: "Você quer trocar cartas? (opcional)"
+              ├─ true → JumpToGraphNode("card_trade")
+              └─ false → (pula troca)
+                        ↓
+PerformActionNode: "Calculando exércitos por territórios..."
+  ↓
+PerformActionNode: "Calculando exércitos por regiões..."
+  ↓
+PerformActionNode: "Total de exércitos recebidos calculado."
+  ↓
+PerformActionNode: "Aloque os exércitos recebidos nos seus territórios."
+  ↓
+EndNode: "Fase 1 concluída."
+```
+
+#### Lógica do código
+
+O grafo verifica primeiro se o jogador tem 5 ou mais cartas (troca obrigatória). Se não tiver, oferece troca opcional. Após a troca (ou se não trocou), calcula e exibe os exércitos recebidos por territórios e regiões, permitindo que o jogador aloque os exércitos.
+
+**Regra implementada:** (regras.md, linhas 45-48)
+> "**1. Recebimento de Exércitos:** O jogador recebe exércitos no início do turno de três maneiras:
+> - **Territórios Possuídos:** Soma-se o número de territórios possuídos e divide-se por 2 (o resultado é arredondado para baixo). O mínimo de exércitos a receber é 3, a não ser que o jogador possua menos de 6 territórios.
+> - **Regiões Conquistadas:** Recebe exércitos extras se possuir uma Região inteira (valor conforme a tabela no tabuleiro). Estes exércitos devem ser distribuídos obrigatoriamente nesta Região.
+> - **Troca de Cartas:** A troca de cartas (3 cartas com figuras iguais ou 3 cartas com figuras diferentes) garante exércitos. Os valores de exércitos por troca são progressivos (4, 6, 8, 10, etc.). **É obrigatório** trocar se o jogador acumular 5 cartas."
+
+### CardTradeGraph - Sub-grafo de Troca de Cartas
+
+#### Estrutura do Grafo
+
+O grafo `CardTradeGraph` é um sub-grafo chamado pelo `Phase1Graph` quando o jogador precisa ou quer trocar cartas.
+
+#### Fluxo do Grafo
+
+```
+StartNode
+  ↓
+PerformActionNode: "TROCA DE CARTAS"
+  ↓
+PerformActionNode: "Mostrando suas cartas de território..."
+  ↓
+BinaryConditionNode: "Você tem 3 cartas com a mesma figura?"
+  ├─ true → PerformActionNode: "Troque 3 cartas iguais e receba exércitos."
+  │         ↓
+  └─ false → BinaryConditionNode: "Você tem 3 cartas com figuras diferentes?"
+              ├─ true → PerformActionNode: "Troque 3 cartas diferentes e receba exércitos."
+              │         ↓
+              └─ false → PerformActionNode: "Você não pode trocar cartas agora."
+                          ↓
+PerformActionNode: "Exércitos recebidos pela troca calculados."
+  ↓
+PerformActionNode: "Remova as 3 cartas trocadas do seu baralho."
+  ↓
+ReturnFromGraphNode
+```
+
+#### Lógica do código
+
+O grafo verifica primeiro se o jogador tem 3 cartas iguais. Se não tiver, verifica se tem 3 cartas diferentes. Se nenhuma das condições for satisfeita, informa que não pode trocar. Após a troca, calcula os exércitos recebidos e remove as cartas trocadas.
+
+**Regra implementada:** (regras.md, linha 48)
+> "A troca de cartas (3 cartas com figuras iguais ou 3 cartas com figuras diferentes) garante exércitos. Os valores de exércitos por troca são progressivos (4, 6, 8, 10, etc.)."
+
+### Resumo
+
+| Grafo | Função | Status |
+|-------|--------|--------|
+| `Phase1Graph` | Fase 1 - Recebimento de Exércitos | ✅ |
+| `CardTradeGraph` | Sub-grafo de Troca de Cartas | ✅ |
+
+[↑ Voltar ao topo](#-índice)
+
+---
+
+**Última atualização:** 30/12/2025 - Fase 1 - Recebimento de Exércitos Implementada
 
