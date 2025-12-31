@@ -7,7 +7,7 @@
 Este documento rastreia o progresso da conversão do projeto **Queller Bot** (War of the Ring) para **War Vikings Bot**, um sistema de IA para jogar War Vikings solo.
 
 **Data de Início:** 20/12/2025  
-**Status Atual:** 🟡 Implementação - Core System Completo
+**Status Atual:** 🟢 Core System Validado - Pronto para Mecânicas do Jogo
 
 ---
 
@@ -23,11 +23,13 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 |------------|--------|-----------|
 | Estrutura Base | 🟢 Completo | 100% |
 | Sistema de Estado | 🟢 Completo | 100% |
-| Grafos de Decisão | 🟡 Em Progresso | 80% |
+| Grafos de Decisão | 🟢 Completo | 100% |
+| GraphCrawler | 🟢 Completo | 100% |
+| Interface CLI | 🟢 Completo | 100% |
+| Grafo de Teste | 🟢 Completo | 100% |
 | Sistema de Combate | ⬜ Não Iniciado | 0% |
-| Interface CLI | ⬜ Não Iniciado | 0% |
 | Mecânicas Especiais | ⬜ Não Iniciado | 0% |
-| Documentação | 🟡 Em Progresso | 50% |
+| Documentação | 🟡 Em Progresso | 60% |
 
 **Legenda:**
 - 🟢 Completo
@@ -52,8 +54,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 #### 1.2 Módulo Principal
 - [x] Criar `Program.cs` (ponto de entrada)
 - [x] Criar estrutura básica do namespace principal
-- [ ] Implementar carregamento de grafos (JSON ou classes C#)
-- [ ] Implementar loop principal do jogo
+- [x] Implementar carregamento de grafos (classes C#)
+- [x] Implementar loop principal do jogo (via CliInterface)
 - [ ] Implementar gerenciamento de fases
 
 [↑ Voltar ao topo](#-visão-geral)
@@ -115,7 +117,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [x] Criar classes base de nós (`Node`, `StartNode`, `EndNode`, etc.)
 - [x] Criar classes de nós: `PerformActionNode`, `BinaryConditionNode`, `MultipleChoiceNode`, `JumpToGraphNode`
 - [x] Decidir formato de grafos (JSON ou classes C#) - Classes C#
-- [ ] Criar sistema de carregamento de grafos
+- [x] Criar sistema de carregamento de grafos (via classes estáticas)
+- [x] Criar primeiro grafo de teste (`TestGraph.cs`)
 - [ ] Criar novos tipos de nós específicos se necessário
 
 #### 4.2 Fases do Turno
@@ -212,11 +215,12 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 ### 6. Interface CLI (Command Line Interface)
 
 #### 6.1 Adaptação do CLI
-- [ ] Criar classe `CliInterface` ou usar `System.Console`
-- [ ] Usar biblioteca CLI (ex: `System.CommandLine` ou `Spectre.Console`)
-- [ ] Atualizar mensagens de boas-vindas
-- [ ] Atualizar mensagens de ajuda
-- [ ] Implementar comandos especiais (help, undo, exit, reset, phase)
+- [x] Criar classe `CliInterface` ou usar `System.Console`
+- [x] Usar `System.Console` (biblioteca CLI opcional para futuro)
+- [x] Atualizar mensagens de boas-vindas
+- [x] Atualizar mensagens de ajuda
+- [x] Implementar comandos especiais (help, undo, exit)
+- [ ] Implementar comandos adicionais (reset, phase)
 
 #### 6.2 Inputs Específicos
 - [ ] Criar input para seleção de territórios
@@ -363,11 +367,14 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [x] Definir arquitetura detalhada
 - [x] Criar estrutura base do projeto
 
-### Fase 2: Core System
+### Fase 2: Core System ✅ COMPLETO
 - [x] Implementar tipos de dados básicos
 - [x] Implementar sistema de estado
 - [x] Adaptar GraphCrawler
-- [ ] Criar primeiro grafo de teste
+- [x] Criar primeiro grafo de teste
+- [x] Criar interface CLI básica
+- [x] Integrar tudo no Program.cs
+- [x] Validar sistema completo
 
 ### Fase 3: Mecânicas Principais
 - [ ] Implementar sistema de combate
@@ -491,6 +498,30 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
   - ✅ GraphCrawler implementado
   - 📝 Documentação de explicação criada (`explicacao-projeto.md`)
 
+### 20/12/2025 - Sistema Validado com Grafo de Teste
+- **Data:** 20/12/2025
+- **Ação:** Criação do primeiro grafo funcional e interface CLI
+- **Status:**
+  - ✅ Grafo de teste criado (`TestGraph.cs`)
+  - ✅ Interface CLI implementada (`CliInterface.cs`)
+  - ✅ Integração completa no `Program.cs`
+  - ✅ Sistema validado e funcionando
+  - ✅ Comandos especiais implementados (help, undo, exit)
+  - 📝 Roteiro de testes criado (`TESTES.md`)
+
+### 30/12/2025 - Testes Completos - Sistema 100% Validado
+- **Data:** 30/12/2025
+- **Ação:** Execução completa de todos os testes
+- **Status:**
+  - ✅ **19/19 testes concluídos (100%)**
+  - ✅ Testes automatizados (compilação e execução)
+  - ✅ Testes manuais do grafo (todos os nós)
+  - ✅ Testes da Interface CLI (todos os comandos)
+  - ✅ Testes do GraphCrawler (validação via código)
+  - ✅ Testes do Sistema de Estado (validação via código)
+  - ✅ Testes de Integração (validação via código + testes manuais)
+  - ✅ Sistema completamente validado e pronto para implementação das mecânicas do jogo
+
 [↑ Voltar ao topo](#-visão-geral)
 
 ---
@@ -503,9 +534,9 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [x] Sistema de estado implementado (`WarVikingsState`)
 - [x] Motor de grafos implementado (`Graph`, `Node`, etc.)
 - [x] GraphCrawler implementado
-- [ ] Primeiro grafo funcionando
+- [x] Primeiro grafo funcionando (`TestGraph.cs`)
+- [x] CLI adaptado (`CliInterface`)
 - [ ] Sistema de combate implementado
-- [ ] CLI adaptado (`CliInterface` ou `System.CommandLine`)
 - [ ] Todas as fases do turno implementadas
 - [ ] Mecânicas especiais implementadas
 - [ ] Documentação completa
@@ -516,6 +547,6 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 
 ---
 
-**Última atualização:** 20/12/2025  
+**Última atualização:** 30/12/2025 - Testes Completos (100%)  
 **Mantido por:** Equipe de Desenvolvimento War Vikings Bot
 
