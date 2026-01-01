@@ -7,7 +7,7 @@
 Este documento rastreia o progresso da conversão do projeto **Queller Bot** (War of the Ring) para **War Vikings Bot**, um sistema de IA para jogar War Vikings solo.
 
 **Data de Início:** 20/12/2025  
-**Status Atual:** 🟢 Core System Validado - Pronto para Mecânicas do Jogo
+**Status Atual:** 🟢 Sistema Completo Funcional - Loop de Turnos Implementado
 
 ---
 
@@ -30,9 +30,12 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 | Fase 1 - Recebimento de Exércitos | 🟢 Completo | 100% |
 | Fase 2 - Ataques | 🟢 Completo | 100% |
 | Fase 3 - Deslocamento de Exércitos | 🟢 Completo | 100% |
+| Fase 4 - Recebimento de Carta | 🟢 Completo | 100% |
 | Sistema de Combate | 🟢 Completo | 100% |
-| Mecânicas Especiais | 🟡 Em Progresso | 20% |
-| Documentação | 🟡 Em Progresso | 70% |
+| Sistema de IA do Bot | 🟢 Completo | 100% |
+| Loop de Turnos (Bot ↔ Jogador) | 🟢 Completo | 100% |
+| Mecânicas Especiais | 🟡 Em Progresso | 30% |
+| Documentação | 🟡 Em Progresso | 80% |
 
 **Legenda:**
 - 🟢 Completo
@@ -150,10 +153,10 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
   - [x] Selecionar deslocamentos estratégicos (estrutura pronta, seleção automática temporária)
   - [x] Executar deslocamento (1 por turno, exceto após conquista)
 
-- [ ] **Fase 4: Recebimento de Carta de Território**
-  - [ ] Verificar se conquistou território adversário
-  - [ ] Receber carta de território
-  - [ ] Verificar se acumulou 5+ cartas (forçar troca)
+- [x] **Fase 4: Recebimento de Carta de Território**
+  - [x] Verificar se conquistou território adversário
+  - [x] Receber carta de território
+  - [x] Verificar se acumulou 5+ cartas (forçar troca)
 
 #### 4.3 Sub-grafos Especializados
 - [x] **CombatGraph.cs** - Resolução de combate terrestre
@@ -193,14 +196,14 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 ### 5. Sistema de Combate
 
 #### 5.1 Combate Terrestre
-- [ ] Implementar rolagem de dados vermelhos (atacante, máx 3)
-- [ ] Implementar rolagem de dados amarelos (defensor, máx 3)
-- [ ] Implementar comparação (maior com maior, segundo com segundo, etc.)
-- [ ] Implementar regra de empate (vitória da defesa)
-- [ ] Implementar perda de exércitos (1 por comparação perdida)
+- [x] Implementar rolagem de dados vermelhos (atacante, máx 3)
+- [x] Implementar rolagem de dados amarelos (defensor, máx 3)
+- [x] Implementar comparação (maior com maior, segundo com segundo, etc.)
+- [x] Implementar regra de empate (vitória da defesa)
+- [x] Implementar perda de exércitos (1 por comparação perdida)
 - [ ] Implementar decisão de enviar para Valhalla ou reserva
-- [ ] Implementar conquista de território (quando defensor eliminado)
-- [ ] Implementar movimento de exércitos após conquista (min 1, máx 3)
+- [x] Implementar conquista de território (quando defensor eliminado)
+- [x] Implementar movimento de exércitos após conquista (min 1, máx 3)
 
 #### 5.2 Combate Naval
 - [ ] Implementar verificação de portos
@@ -271,8 +274,8 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [ ] Implementar forçar troca após eliminação (se 5+ cartas)
 
 #### 7.4 Primeira Rodada
-- [ ] Implementar proibição de ataque na primeira rodada
-- [ ] Implementar apenas posicionamento de exércitos
+- [x] Implementar proibição de ataque na primeira rodada
+- [x] Implementar apenas posicionamento de exércitos
 
 [↑ Voltar ao topo](#-visão-geral)
 
@@ -383,16 +386,21 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [x] Integrar tudo no Program.cs
 - [x] Validar sistema completo
 
-### Fase 3: Mecânicas Principais
-- [ ] Implementar sistema de combate
+### Fase 3: Mecânicas Principais ✅ COMPLETO
+- [x] Implementar sistema de combate (resolução completa)
 - [x] Implementar recebimento de exércitos (Fase 1 completa)
 - [x] Implementar sistema de cartas (troca de cartas implementada)
+- [x] Implementar sistema de IA do bot (decisões automáticas)
+- [x] Implementar loop de turnos (Bot ↔ Jogador)
 - [ ] Implementar Valhalla (estrutura base pronta, falta lógica de invocação)
 
-### Fase 4: Grafos Completos
-- [ ] Implementar todas as fases do turno
-- [ ] Implementar sub-grafos especializados
-- [ ] Implementar mecânicas especiais
+### Fase 4: Grafos Completos ✅ COMPLETO
+- [x] Implementar todas as fases do turno (Fase 1, 2, 3, 4)
+- [x] Implementar sub-grafos especializados (CombatGraph, CardTradeGraph)
+- [x] Implementar TurnGraph (orquestra todas as fases)
+- [ ] Implementar combate naval (NavalCombatGraph)
+- [ ] Implementar ValhallaGraph
+- [ ] Implementar GodPowersGraph
 
 ### Fase 5: Interface e Polimento
 - [ ] Adaptar CLI completamente
@@ -594,17 +602,34 @@ Criar um sistema CLI (Command Line Interface) em **.NET (C#)** que implementa um
 - [x] GraphCrawler implementado
 - [x] Primeiro grafo funcionando (`TestGraph.cs`)
 - [x] CLI adaptado (`CliInterface`)
-- [ ] Sistema de combate implementado
-- [ ] Todas as fases do turno implementadas
-- [ ] Mecânicas especiais implementadas
+- [x] Sistema de combate implementado
+- [x] Todas as fases do turno implementadas (Fase 1, 2, 3, 4)
+- [x] Sistema de IA do bot implementado
+- [x] Loop de turnos implementado (Bot ↔ Jogador)
+- [x] Projeto pronto para uso (`dotnet run` ou executável)
+- [ ] Mecânicas especiais implementadas (Valhalla, Poderes dos Deuses, Combate Naval)
 - [ ] Documentação completa
 - [ ] Testes realizados (xUnit ou NUnit)
-- [ ] Projeto pronto para uso (`dotnet run` ou executável)
 
 [↑ Voltar ao topo](#-visão-geral)
 
 ---
 
-**Última atualização:** 30/12/2025 - TODOS OS TESTES CONCLUÍDOS - 49/49 testes (100%) ✅  
+### 31/12/2025 - Sistema de IA do Bot e Loop de Turnos Implementados
+- **Data:** 31/12/2025
+- **Ação:** Implementação do sistema de IA do bot e loop de turnos
+- **Status:**
+  - ✅ Sistema de IA do bot implementado (`BotStrategy`, `DecisionContext`, `BotObjective`)
+  - ✅ Lógica de decisão do bot para ataques, seleção de territórios e movimento de exércitos
+  - ✅ Avaliação automática de condições no `GraphCrawler`
+  - ✅ Loop de turnos implementado (Bot → Jogador → Bot...)
+  - ✅ Mensagem "Agora é a vez do jogador!" após turno do bot
+  - ✅ Reinicialização automática do turno do bot após turno do jogador
+  - ✅ Método `Reset()` no `GraphCrawler` para reiniciar turnos
+  - ✅ Código de ataque e combate reativado e funcionando
+  - ✅ Avaliação automática de "Você tem possibilidades de deslocamento?"
+  - ✅ Progresso geral: Sistema de IA completo e loop de turnos funcional
+
+**Última atualização:** 31/12/2025 - Sistema de IA e Loop de Turnos Implementados ✅  
 **Mantido por:** Equipe de Desenvolvimento War Vikings Bot
 

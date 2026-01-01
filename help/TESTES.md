@@ -4,7 +4,7 @@
 
 Este documento contém o roteiro completo de testes para validar o funcionamento do War Vikings Bot.
 
-**Última atualização:** 30/12/2025 - TODOS OS TESTES CONCLUÍDOS - 49/49 testes (100%) ✅
+**Última atualização:** 31/12/2025 - Sistema de IA e Loop de Turnos Implementados ✅
 
 **Testes Concluídos Hoje (30/12/2025):**
 - ✅ 8.7 - Rolagem de Dados (teste manual com USE_TEST_DATA=true)
@@ -1489,7 +1489,7 @@ O sistema está 100% validado e pronto para uso.
 
 ---
 
-**Última atualização:** 30/12/2025 - TODOS OS TESTES CONCLUÍDOS - 49/49 testes (100%) ✅
+**Última atualização:** 31/12/2025 - Sistema de IA e Loop de Turnos Implementados ✅
 
 **Testes Concluídos Hoje (30/12/2025):**
 - ✅ 8.7 - Rolagem de Dados (teste manual com USE_TEST_DATA=true)
