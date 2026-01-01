@@ -49,6 +49,24 @@ namespace WarVikingsBot.Crawler
             _rootNode = graph.RootNode;
             _currentNode = _rootNode;
             
+            InitializeBotStrategy();
+        }
+        
+        /// <summary>
+        /// Reinicia o crawler para o início do grafo (início de um novo turno).
+        /// </summary>
+        public void Reset()
+        {
+            _currentNode = _rootNode;
+            _jumpStack.Clear();
+            _options.Clear();
+            _messageBuffer = string.Empty;
+            _canAttackTerritories = null; // Reset da flag de ataque
+            InitializeBotStrategy();
+        }
+        
+        private void InitializeBotStrategy()
+        {
             // Inicializar estratégia do bot se estiver em modo bot
             if (_state.IsBotMode)
             {

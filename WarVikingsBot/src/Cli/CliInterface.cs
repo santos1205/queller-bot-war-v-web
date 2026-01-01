@@ -20,6 +20,30 @@ namespace WarVikingsBot.Cli
         
         public void Run()
         {
+            // Loop principal de turnos: Bot → Jogador → Bot → Jogador...
+            while (true)
+            {
+                // ====================================================================================
+                // TURNO DO BOT
+                // ====================================================================================
+                RunTurn();
+                
+                // ====================================================================================
+                // TURNO DO JOGADOR
+                // ====================================================================================
+                Console.WriteLine("\n═══════════════════════════════════════");
+                Console.WriteLine("Agora é a vez do jogador!");
+                Console.WriteLine("═══════════════════════════════════════");
+                Console.WriteLine("\n[Pressione Enter após completar seu turno no tabuleiro físico]");
+                Console.ReadLine();
+                
+                // Reiniciar o crawler para o próximo turno do bot
+                _crawler.Reset();
+            }
+        }
+        
+        private void RunTurn()
+        {
             while (!_crawler.IsAtEnd())
             {
                 // PRIMEIRO: Processar automaticamente qualquer coisa que precise ser processada
@@ -101,7 +125,7 @@ namespace WarVikingsBot.Cli
                 }
             }
             
-            // Exibir mensagem final
+            // Exibir mensagem final do turno
             var finalMessage = _crawler.GetMessage();
             if (!string.IsNullOrWhiteSpace(finalMessage))
             {
@@ -110,7 +134,7 @@ namespace WarVikingsBot.Cli
             }
             
             Console.WriteLine("\n═══════════════════════════════════════");
-            Console.WriteLine("Grafo concluído!");
+            Console.WriteLine("Turno do bot concluído!");
             Console.WriteLine("═══════════════════════════════════════");
         }
         
