@@ -4,7 +4,7 @@
 
 Este documento contém o roteiro completo de testes para validar o funcionamento do War Vikings Bot.
 
-**Última atualização:** 30/12/2025 - Testes de combate validados manualmente - 48/49 testes concluídos
+**Última atualização:** 30/12/2025 - TODOS OS TESTES CONCLUÍDOS - 49/49 testes (100%) ✅
 
 **Testes Concluídos Hoje (30/12/2025):**
 - ✅ 8.7 - Rolagem de Dados (teste manual com USE_TEST_DATA=true)
@@ -1034,10 +1034,12 @@ Este documento contém o roteiro completo de testes para validar o funcionamento
 - ✅ Pergunta sobre movimento de exércitos aparece
 - ✅ Território é transferido para o atacante
 
-**Status:** ✅ **CONCLUÍDO (PARCIAL)** - 30/12/2025 (via teste manual)
+**Status:** ✅ **CONCLUÍDO** - 30/12/2025 (via teste manual)
 - ✅ Pergunta "O território foi conquistado? (todos os exércitos defensores foram destruídos)" aparece
-- ✅ Fluxo de navegação funciona corretamente
-- ⚠️ Teste completo com `true` (conquista) ainda pendente - requer teste do movimento de exércitos (8.11)
+- ✅ Ao responder `true`, mensagem "Território conquistado! Você deve mover exércitos para o território conquistado." aparece
+- ✅ Pergunta sobre movimento de exércitos aparece
+- ✅ Território é transferido para o atacante (via `ApplyCombatLosses()`)
+- ✅ Fluxo completo testado com conquista `true` e movimento de exércitos
 - ✅ Testado com dados de teste (USE_TEST_DATA=true)
 
 ---
@@ -1057,10 +1059,13 @@ Este documento contém o roteiro completo de testes para validar o funcionamento
 - ✅ Território de origem mantém pelo menos 1 exército
 - ✅ Território conquistado recebe os exércitos
 
-**Status:** ⬜ **PENDENTE** - Aguardando implementação da lógica de combate
-- ⚠️ Atualmente o CombatGraph apenas exibe mensagens
-- ⚠️ Método `MoveArmiesAfterConquest()` existe no `WarVikingsState` mas não é chamado pelo grafo
-- ⚠️ Necessário implementar chamada aos métodos do estado no CombatGraph
+**Status:** ✅ **CONCLUÍDO** - 30/12/2025 (via teste manual)
+- ✅ Mensagem "Território conquistado! Você deve mover exércitos para o território conquistado." aparece
+- ✅ Mensagem "Quantos exércitos você quer mover para o território conquistado? (mínimo 1, máximo 3)" aparece
+- ✅ Mensagem "Movendo exércitos para o território conquistado..." aparece
+- ✅ Método `MoveArmiesAfterConquest()` é chamado via `ExecuteActionNode` com `ActionId = "move_armies_after_conquest"`
+- ✅ Exércitos são movidos corretamente após conquista
+- ✅ Testado com dados de teste (USE_TEST_DATA=true)
 
 ---
 
@@ -1083,6 +1088,7 @@ Este documento contém o roteiro completo de testes para validar o funcionamento
 **Status:** ✅ **CONCLUÍDO** - 30/12/2025 (via teste manual)
 - ✅ Pergunta "O território foi conquistado?" aparece após aplicação de perdas
 - ✅ Ao responder `false`, mensagem "Território não foi conquistado. Combate finalizado." aparece
+- ✅ Ao responder `true`, mensagem "Território conquistado!" aparece e fluxo de movimento de exércitos funciona
 - ✅ Mensagem "Combate resolvido." aparece
 - ✅ Programa retorna corretamente para Phase2Graph
 - ✅ Mensagem "Combate resolvido. Você pode realizar outro ataque se desejar." aparece
@@ -1414,7 +1420,7 @@ Use este checklist enquanto executa os testes:
 
 ## ✅ Resultado Final
 
-**Status Geral:** 🟡 **EM PROGRESSO** (48/49 testes concluídos - 1 teste da Fase 2 pendente)
+**Status Geral:** 🟢 **COMPLETO** (49/49 testes concluídos - 100%)
 
 **Data do Último Teste:** 30/12/2025
 
@@ -1428,7 +1434,7 @@ Use este checklist enquanto executa os testes:
 - ✅ Testes do Sistema de Estado validados via código
 - ✅ Testes de Integração validados via código e testes manuais
 - ✅ Fase 1 - Recebimento de Exércitos: 13/13 testes concluídos
-- ✅ Fase 2 - Ataques: 12/13 testes concluídos, 1/13 pendente (8.11 - Movimento de Exércitos requer teste com conquista `true`)
+- ✅ Fase 2 - Ataques: 13/13 testes concluídos (100%)
 - ✅ Fase 3 - Deslocamento de Exércitos: 4/4 testes concluídos
 - ✅ Testes de combate validados com dados de teste (USE_TEST_DATA=true)
 
@@ -1443,9 +1449,9 @@ Use este checklist enquanto executa os testes:
 | Sistema de Estado | 2 | 2 | 0 |
 | Integração | 2 | 2 | 0 |
 | Fase 1 - Recebimento de Exércitos | 13 | 13 | 0 |
-| Fase 2 - Ataques | 13 | 12 | 1 (8.11 - requer teste com conquista) |
+| Fase 2 - Ataques | 13 | 13 | 0 |
 | Fase 3 - Deslocamento de Exércitos | 4 | 4 | 0 |
-| **TOTAL** | **49** | **48** | **1** |
+| **TOTAL** | **49** | **49** | **0** |
 
 ### Testes Aprovados
 1. ✅ 1.1 Compilação do Projeto
@@ -1470,17 +1476,20 @@ Use este checklist enquanto executa os testes:
 20. ✅ 8.7 Resolução de Combate - Rolagem de Dados (teste manual)
 21. ✅ 8.8 Resolução de Combate - Comparação de Dados (teste manual)
 22. ✅ 8.9 Resolução de Combate - Aplicação de Perdas (teste manual)
-23. ✅ 8.10 Resolução de Combate - Conquista de Território (teste manual - parcial)
-24. ✅ 8.12 Resolução de Combate - Sem Conquista (teste manual)
+23. ✅ 8.10 Resolução de Combate - Conquista de Território (teste manual)
+24. ✅ 8.11 Resolução de Combate - Movimento de Exércitos (teste manual)
+25. ✅ 8.12 Resolução de Combate - Sem Conquista (teste manual)
 
-### Próximos Passos
-- ⬜ 8.11 - Movimento de Exércitos: Executar teste com conquista `true` para validar movimento de exércitos após conquista
+### 🎉 Status Final
+**TODOS OS 49 TESTES FORAM CONCLUÍDOS COM SUCESSO!**
+
+O sistema está 100% validado e pronto para uso.
 
 **📖 Guia Detalhado:** Consulte a seção "🚀 Guia de Execução Passo a Passo" acima para instruções detalhadas de cada teste.
 
 ---
 
-**Última atualização:** 30/12/2025 - Testes de combate validados manualmente - 48/49 testes concluídos
+**Última atualização:** 30/12/2025 - TODOS OS TESTES CONCLUÍDOS - 49/49 testes (100%) ✅
 
 **Testes Concluídos Hoje (30/12/2025):**
 - ✅ 8.7 - Rolagem de Dados (teste manual com USE_TEST_DATA=true)

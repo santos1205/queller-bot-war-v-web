@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using WarVikingsBot.AI;
 using WarVikingsBot.Graphs;
 using WarVikingsBot.State;
 
@@ -14,6 +16,23 @@ namespace WarVikingsBot.Crawler
         private Stack<Node> _jumpStack;
         private List<string> _options;
         private string _messageBuffer;
+        private BotStrategy? _botStrategy;
+        
+        /// <summary>
+        /// Flag que armazena se o bot tem territórios que podem atacar.
+        /// 
+        /// Esta flag é definida quando o bot responde à pergunta "Você tem territórios que podem atacar?"
+        /// e é usada para pular toda a fase de ataques e combate quando o bot não pode atacar.
+        /// 
+        /// Valores:
+        /// - null: Ainda não foi avaliado
+        /// - false: Bot NÃO tem territórios que podem atacar → PULA toda a fase de ataques
+        /// - true: Bot TEM territórios que podem atacar → Permite avaliação estratégica
+        /// 
+        /// IMPORTANTE: Quando esta flag é false, TODAS as perguntas subsequentes de ataque
+        /// são respondidas automaticamente como NÃO, sem nem verificar a estratégia do bot.
+        /// </summary>
+        private bool? _canAttackTerritories = null;
         
         public GraphCrawler(string graphId, Dictionary<string, Graph> graphs, WarVikingsState state)
         {
@@ -30,6 +49,28 @@ namespace WarVikingsBot.Crawler
             _rootNode = graph.RootNode;
             _currentNode = _rootNode;
             
+            // Inicializar estratégia do bot se estiver em modo bot
+            if (_state.IsBotMode)
+            {
+                try
+                {
+                    var context = new DecisionContext
+                    {
+                        State = _state,
+                        PlayerId = _state.CurrentPlayer,
+                        Objective = _state.BotObjective,
+                        ObjectiveParameters = _state.BotObjectiveParameters
+                    };
+                    _botStrategy = new BotStrategy(context);
+                }
+                catch (Exception ex)
+                {
+                    // Se houver erro na inicialização, desativa modo bot
+                    Console.WriteLine($"⚠️  Erro ao inicializar BotStrategy: {ex.Message}");
+                    _state.IsBotMode = false;
+                }
+            }
+            
             AutoCrawl();
         }
         
@@ -40,6 +81,14 @@ namespace WarVikingsBot.Crawler
                 return false;
             
             return _currentNode is EndNode;
+        }
+        
+        /// <summary>
+        /// Verifica se o bot está em modo automático
+        /// </summary>
+        public bool IsBotMode()
+        {
+            return _state.IsBotMode;
         }
         
         public string GetMessage()
@@ -160,26 +209,179 @@ namespace WarVikingsBot.Crawler
                 if (IsAtEnd())
                     break;
                 
+                /* ====================================================================================
+                 * FASE DE ATAQUES E COMBATE - CÓDIGO DESABILITADO
+                 * ====================================================================================
+                 * TODO O CÓDIGO RELACIONADO A ATAQUES E COMBATE FOI COMENTADO (DESABILITADO)
+                 * 
+                 * Esta seção continha:
+                 * - Lógica de pulo automático de nós de ataque quando bot não pode atacar
+                 * - Avaliação automática de condições de ataque
+                 * - Pulo de nós de ação relacionados a combate
+                 * - Pulo do grafo de combate
+                 * 
+                 * Com este código desabilitado, a fase de ataques e combate NÃO será executada.
+                 * ==================================================================================== */
+                
+                // Verificar se é BinaryConditionNode com condições automáticas ANTES de adicionar ao buffer
+                if (_currentNode is BinaryConditionNode binaryNode)
+                {
+                    /* COMENTADO: Lógica de pulo pré-análise de nós de ataque
+                    if (_canAttackTerritories.HasValue && _canAttackTerritories.Value == false)
+                    {
+                        var nodeId = binaryNode.Id?.ToLower() ?? "";
+                        var condition = binaryNode.Condition.ToLower();
+                        bool isAttackRelated = nodeId.Contains("ask_attack") || 
+                                               nodeId == "phase2_ask_attack" ||
+                                               nodeId.Contains("attack") ||
+                                               condition.Contains("quer realizar um ataque") || 
+                                               condition.Contains("quer atacar") ||
+                                               condition.Contains("realizar um ataque") ||
+                                               (condition.Contains("ataque") && condition.Contains("quer"));
+                        
+                        if (isAttackRelated)
+                        {
+                            _messageBuffer += binaryNode.Condition + "\n";
+                            _messageBuffer += "\n🤖 [BOT] Decisão: NÃO (Pulando fase de ataques - sem territórios que podem atacar)\n";
+                            _currentNode = binaryNode.FalseNode;
+                            continue;
+                        }
+                    }
+                    */
+                    
+                    // Avaliar condição automaticamente (sem lógica de ataque)
+                    var autoResult = EvaluateAutoCondition(binaryNode);
+                    if (autoResult.HasValue)
+                    {
+                        /* COMENTADO: Lógica de forçar false para ataques
+                        if (_canAttackTerritories.HasValue && _canAttackTerritories.Value == false)
+                        {
+                            var nodeId = binaryNode.Id?.ToLower() ?? "";
+                            var condition = binaryNode.Condition.ToLower();
+                            bool isAttackRelated = nodeId.Contains("ask_attack") || 
+                                                   nodeId == "phase2_ask_attack" ||
+                                                   condition.Contains("quer realizar um ataque") || 
+                                                   condition.Contains("quer atacar");
+                            
+                            if (isAttackRelated)
+                            {
+                                autoResult = false;
+                            }
+                        }
+                        */
+                        
+                        // Condição automática - mostrar decisão do bot e seguir automaticamente
+                        var decision = autoResult.Value ? "SIM" : "NÃO";
+                        var botDecision = $"\n🤖 [BOT] Decisão: {decision}";
+                        
+                        /* COMENTADO: Contexto de decisão de ataque
+                        if (_state.IsBotMode && _botStrategy != null)
+                        {
+                            var condition = binaryNode.Condition.ToLower();
+                            if (condition.Contains("quer realizar um ataque") || 
+                                condition.Contains("quer atacar") ||
+                                condition.Contains("ask_attack"))
+                            {
+                                if (autoResult.Value)
+                                {
+                                    botDecision += " (Bot decidiu atacar baseado na estratégia e vantagem numérica)";
+                                }
+                                else
+                                {
+                                    botDecision += " (Bot decidiu não atacar - sem vantagem clara ou sem alvos adequados)";
+                                }
+                            }
+                        }
+                        */
+                        
+                        _messageBuffer += binaryNode.Condition + "\n";
+                        _messageBuffer += botDecision + "\n";
+                        _currentNode = autoResult.Value ? binaryNode.TrueNode : binaryNode.FalseNode;
+                        continue;
+                    }
+                    // Se não for automática, adiciona ao buffer e para para aguardar interação
+                    AddToMessageBuffer(_currentNode);
+                    break;
+                }
+                
+                /* COMENTADO: Lógica de pulo de nós de ataque/combate
+                if (_canAttackTerritories.HasValue && _canAttackTerritories.Value == false)
+                {
+                    if (_currentNode is ExecuteActionNode executeActionCheck)
+                    {
+                        var actionId = executeActionCheck.ActionId?.ToLower() ?? "";
+                        var message = executeActionCheck.Message?.ToLower() ?? "";
+                        bool isAttackAction = actionId.Contains("combat") || 
+                                             actionId.Contains("attack") ||
+                                             message.Contains("combate") ||
+                                             message.Contains("ataque") ||
+                                             message.Contains("origem") ||
+                                             message.Contains("alvo");
+                        
+                        if (isAttackAction)
+                        {
+                            _currentNode = GetNextNode(_currentNode);
+                            continue;
+                        }
+                    }
+                    
+                    if (_currentNode is PerformActionNode performActionCheck)
+                    {
+                        var action = performActionCheck.Action?.ToLower() ?? "";
+                        var nodeId = performActionCheck.Id?.ToLower() ?? "";
+                        bool isAttackAction = action.Contains("combate") ||
+                                             action.Contains("ataque") ||
+                                             action.Contains("origem") ||
+                                             action.Contains("alvo") ||
+                                             nodeId.Contains("combat") ||
+                                             nodeId.Contains("attack") ||
+                                             nodeId.Contains("source") ||
+                                             nodeId.Contains("target");
+                        
+                        if (isAttackAction && !action.Contains("não tem territórios") && !action.Contains("não há ataques"))
+                        {
+                            _currentNode = GetNextNode(_currentNode);
+                            continue;
+                        }
+                    }
+                    
+                    if (_currentNode is JumpToGraphNode jumpGraphCheck)
+                    {
+                        var graphId = jumpGraphCheck.TargetGraphId?.ToLower() ?? "";
+                        if (graphId.Contains("combat"))
+                        {
+                            _currentNode = GetNextNode(_currentNode);
+                            continue;
+                        }
+                    }
+                }
+                */
+                
+                // Se for PerformActionNode sobre movimento de exércitos e estiver em modo bot,
+                // mostrar decisão do bot antes da mensagem
+                if (_currentNode is PerformActionNode performNode && 
+                    _state.IsBotMode && 
+                    _botStrategy != null &&
+                    performNode.Action.Contains("Quantos exércitos você quer mover"))
+                {
+                    // Bot já vai decidir no ExecuteActionNode, mas vamos mostrar a decisão aqui
+                    if (!string.IsNullOrEmpty(_state.CurrentCombatSourceTerritory) &&
+                        !string.IsNullOrEmpty(_state.CurrentCombatTargetTerritory))
+                    {
+                        var armiesToMove = _botStrategy.DecideArmiesToMoveAfterConquest(
+                            _state.CurrentCombatSourceTerritory,
+                            _state.CurrentCombatTargetTerritory
+                        );
+                        _messageBuffer += $"\n🤖 [BOT] Decidiu mover {armiesToMove} exército(s) para o território conquistado\n";
+                    }
+                }
+                
                 AddToMessageBuffer(_currentNode);
                 
                 // Executar ação se for ExecuteActionNode
                 if (_currentNode is ExecuteActionNode executeNode)
                 {
                     ExecuteAction(executeNode);
-                }
-                
-                // Verificar se é BinaryConditionNode com condições automáticas
-                if (_currentNode is BinaryConditionNode binaryNode)
-                {
-                    var autoResult = EvaluateAutoCondition(binaryNode);
-                    if (autoResult.HasValue)
-                    {
-                        // Condição automática - seguir automaticamente
-                        _currentNode = autoResult.Value ? binaryNode.TrueNode : binaryNode.FalseNode;
-                        continue;
-                    }
-                    // Se não for automática, para e aguarda interação do usuário
-                    break;
                 }
                 
                 if (_currentNode is InteractiveNode)
@@ -224,12 +426,158 @@ namespace WarVikingsBot.Crawler
                 return _state.HasConqueredTerritoryThisTurn(playerId);
             }
             
-            // Verificar se tem territórios que podem atacar
+            // ====================================================================================
+            // AVALIAÇÃO: "Você tem territórios que podem atacar?" - SEMPRE RETORNA FALSE
+            // ====================================================================================
+            // Como toda a fase de ataques está desabilitada, esta pergunta sempre retorna FALSE
+            // para garantir que a fase de ataques seja pulada automaticamente.
+            // ====================================================================================
             if (condition.Contains("territórios que podem atacar") || condition.Contains("territorios que podem atacar"))
             {
-                var sources = _state.GetAttackSourceTerritories(playerId);
-                return sources.Count > 0;
+                // SEMPRE retorna false quando a fase de ataques está desabilitada
+                return false;
             }
+            
+            // ====================================================================================
+            // AVALIAÇÃO: "Você tem possibilidades de deslocamento?"
+            // ====================================================================================
+            // Verifica se o jogador tem territórios contíguos com mais de 1 exército que podem
+            // ser deslocados. Retorna true se houver possibilidades, false caso contrário.
+            // ====================================================================================
+            if (condition.Contains("possibilidades de deslocamento") || condition.Contains("possibilidade de deslocamento"))
+            {
+                // Verifica se há territórios que podem deslocar (territórios com > 1 exército)
+                // O método GetMovementSourceTerritories já verifica se há destinos disponíveis
+                var movementSources = _state.GetMovementSourceTerritories(playerId);
+                return movementSources.Count > 0; // Retorna true se houver pelo menos uma possibilidade de deslocamento
+            }
+            
+            /* ====================================================================================
+             * AVALIAÇÃO: "Você tem territórios que podem atacar?" - CÓDIGO ORIGINAL DESABILITADO
+             * ====================================================================================
+             * TODO O CÓDIGO DE AVALIAÇÃO DE TERRITÓRIOS QUE PODEM ATACAR FOI COMENTADO (DESABILITADO)
+             * 
+             * Esta seção continha:
+             * - Validação de primeira rodada
+             * - Verificação de territórios com >= 2 exércitos
+             * - Verificação de alvos adjacentes inimigos
+             * - Definição da flag _canAttackTerritories
+             * 
+             * Com este código desabilitado, a pergunta não será respondida automaticamente.
+             * ==================================================================================== */
+            /* COMENTADO: Avaliação de territórios que podem atacar (código original)
+            if (condition.Contains("territórios que podem atacar") || condition.Contains("territorios que podem atacar"))
+            {
+                if (_state.IsFirstRound)
+                {
+                    _canAttackTerritories = false;
+                    return false;
+                }
+                
+                var sources = _state.GetAttackSourceTerritories(playerId);
+                if (sources.Count == 0)
+                {
+                    _canAttackTerritories = false;
+                    return false;
+                }
+                
+                bool hasAnyTarget = false;
+                foreach (var source in sources)
+                {
+                    var targets = _state.GetAttackableTargetsFromSource(playerId, source);
+                    if (targets.Count > 0)
+                    {
+                        hasAnyTarget = true;
+                        break;
+                    }
+                }
+                
+                if (!hasAnyTarget)
+                {
+                    _canAttackTerritories = false;
+                    return false;
+                }
+                
+                _canAttackTerritories = true;
+                return true;
+            }
+            */
+            
+            /* ====================================================================================
+             * DECISÕES DO BOT - CÓDIGO DE ATAQUE DESABILITADO
+             * ====================================================================================
+             * TODO O CÓDIGO RELACIONADO A DECISÕES DE ATAQUE DO BOT FOI COMENTADO (DESABILITADO)
+             * 
+             * Esta seção continha:
+             * - Avaliação de "Você quer realizar um ataque?"
+             * - Validações de territórios que podem atacar
+             * - Consulta à estratégia do bot para decidir se ataca
+             * 
+             * Com este código desabilitado, o bot NÃO tomará decisões de ataque.
+             * ==================================================================================== */
+            
+            // Decisões do bot (se estiver em modo bot) - ATACAR DESABILITADO
+            /* COMENTADO: Toda a lógica de decisão de ataque do bot
+            if (_state.IsBotMode && _botStrategy != null)
+            {
+                var nodeId = node.Id?.ToLower() ?? "";
+                bool isAttackQuestion = nodeId.Contains("ask_attack") || nodeId == "phase2_ask_attack" ||
+                                       condition.Contains("quer realizar um ataque") || 
+                                       condition.Contains("quer atacar") ||
+                                       condition.Contains("realizar um ataque") ||
+                                       (condition.Contains("ataque") && condition.Contains("quer"));
+                
+                if (isAttackQuestion)
+                {
+                    if (_canAttackTerritories.HasValue && _canAttackTerritories.Value == false)
+                    {
+                        return false;
+                    }
+                    
+                    if (!_canAttackTerritories.HasValue)
+                    {
+                        var attackSources = _state.GetAttackSourceTerritories(playerId);
+                        if (attackSources.Count == 0)
+                        {
+                            _canAttackTerritories = false;
+                            return false;
+                        }
+                        
+                        var attackableTargets = _state.GetAttackableTerritories(playerId);
+                        if (attackableTargets.Count == 0)
+                        {
+                            _canAttackTerritories = false;
+                            return false;
+                        }
+                        
+                        _canAttackTerritories = true;
+                    }
+                    
+                    if (_canAttackTerritories.HasValue && _canAttackTerritories.Value == false)
+                    {
+                        return false;
+                    }
+                    
+                    var finalCheckSources = _state.GetAttackSourceTerritories(playerId);
+                    var finalCheckTargets = _state.GetAttackableTerritories(playerId);
+                    if (finalCheckSources.Count == 0 || finalCheckTargets.Count == 0)
+                    {
+                        _canAttackTerritories = false;
+                        return false;
+                    }
+                    
+                    try
+                    {
+                        return _botStrategy.ShouldAttack();
+                    }
+                    catch
+                    {
+                        _canAttackTerritories = false;
+                        return false;
+                    }
+                }
+            }
+            */
             
             // Se não for uma condição automática, retorna null para aguardar interação
             return null;
@@ -243,6 +591,7 @@ namespace WarVikingsBot.Crawler
             
             switch (actionId)
             {
+                /* COMENTADO: Ações de combate desabilitadas
                 case "resolve_combat":
                     if (!string.IsNullOrEmpty(state.CurrentCombatSourceTerritory) && 
                         !string.IsNullOrEmpty(state.CurrentCombatTargetTerritory))
@@ -268,47 +617,81 @@ namespace WarVikingsBot.Crawler
                         );
                     }
                     break;
+                */
                     
+                /* COMENTADO: Movimento de exércitos após conquista desabilitado
                 case "move_armies_after_conquest":
                 case "move_armies":
                     if (!string.IsNullOrEmpty(state.CurrentCombatSourceTerritory) &&
                         !string.IsNullOrEmpty(state.CurrentCombatTargetTerritory))
                     {
-                        // Por padrão, move 1 exército (mínimo)
-                        // TODO: Permitir que o usuário escolha quantos mover
+                        int armiesToMove = 1; // Padrão: mínimo
+                        
+                        if (state.IsBotMode && _botStrategy != null)
+                        {
+                            armiesToMove = _botStrategy.DecideArmiesToMoveAfterConquest(
+                                state.CurrentCombatSourceTerritory,
+                                state.CurrentCombatTargetTerritory
+                            );
+                            _messageBuffer += $"\n🤖 [BOT] Decidiu mover {armiesToMove} exército(s) para o território conquistado\n";
+                        }
+                        
                         state.MoveArmiesAfterConquest(
                             playerId,
                             state.CurrentCombatSourceTerritory,
                             state.CurrentCombatTargetTerritory,
-                            1 // Por padrão, move 1 exército
+                            armiesToMove
                         );
                     }
                     break;
+                */
                     
+                /* COMENTADO: Seleção de territórios de combate desabilitada
                 case "set_combat_source":
                     // Define o território de origem do combate
-                    // Por enquanto, usa o primeiro território atacável do jogador
-                    // TODO: Implementar seleção real do usuário
-                    var sources = state.GetAttackSourceTerritories(playerId);
-                    if (sources.Count > 0)
+                    if (state.IsBotMode && _botStrategy != null)
                     {
-                        state.CurrentCombatSourceTerritory = sources[0];
+                        var selectedSource = _botStrategy.SelectAttackSourceTerritory();
+                        if (!string.IsNullOrEmpty(selectedSource))
+                        {
+                            state.CurrentCombatSourceTerritory = selectedSource;
+                            _messageBuffer += $"\n🤖 [BOT] Escolheu território de origem: {selectedSource}\n";
+                        }
+                    }
+                    else
+                    {
+                        var sources = state.GetAttackSourceTerritories(playerId);
+                        if (sources.Count > 0)
+                        {
+                            state.CurrentCombatSourceTerritory = sources[0];
+                        }
                     }
                     break;
                     
                 case "set_combat_target":
                     // Define o território alvo do combate
-                    // Por enquanto, usa o primeiro território atacável a partir da origem
-                    // TODO: Implementar seleção real do usuário
                     if (!string.IsNullOrEmpty(state.CurrentCombatSourceTerritory))
                     {
-                        var targets = state.GetAttackableTargetsFromSource(playerId, state.CurrentCombatSourceTerritory);
-                        if (targets.Count > 0)
+                        if (state.IsBotMode && _botStrategy != null)
                         {
-                            state.CurrentCombatTargetTerritory = targets[0];
+                            var selectedTarget = _botStrategy.SelectAttackTargetTerritory(state.CurrentCombatSourceTerritory);
+                            if (!string.IsNullOrEmpty(selectedTarget))
+                            {
+                                state.CurrentCombatTargetTerritory = selectedTarget;
+                                _messageBuffer += $"\n🤖 [BOT] Escolheu território alvo: {selectedTarget}\n";
+                            }
+                        }
+                        else
+                        {
+                            var targets = state.GetAttackableTargetsFromSource(playerId, state.CurrentCombatSourceTerritory);
+                            if (targets.Count > 0)
+                            {
+                                state.CurrentCombatTargetTerritory = targets[0];
+                            }
                         }
                     }
                     break;
+                */
                     
                 case "set_movement_source":
                     // Define o território de origem do deslocamento

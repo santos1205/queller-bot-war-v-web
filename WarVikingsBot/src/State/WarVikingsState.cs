@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WarVikingsBot.AI;
 using WarVikingsBot.Models;
 
 namespace WarVikingsBot.State
@@ -33,6 +34,21 @@ namespace WarVikingsBot.State
         public int CurrentRound { get; set; } = 1;
         
         public bool IsFirstRound => CurrentRound == 1;
+        
+        /// <summary>
+        /// Indica se o bot está em modo automático (IA toma decisões) ou manual (usuário decide)
+        /// </summary>
+        public bool IsBotMode { get; set; } = true;
+        
+        /// <summary>
+        /// Objetivo do bot (usado para decisões estratégicas)
+        /// </summary>
+        public BotObjective BotObjective { get; set; } = BotObjective.ExpandAndFortify;
+        
+        /// <summary>
+        /// Parâmetros específicos do objetivo do bot
+        /// </summary>
+        public Dictionary<string, object> BotObjectiveParameters { get; set; } = new Dictionary<string, object>();
         
         // Propriedades temporárias para combate atual
         public string? CurrentCombatSourceTerritory { get; set; }
@@ -683,7 +699,13 @@ namespace WarVikingsBot.State
         
         /// <summary>
         /// Inicializa dados de teste para permitir testar o sistema de combate.
-        /// Cria 2 territórios adjacentes: um do jogador 1 (com 3 exércitos) e um do jogador 2 (com 2 exércitos).
+        /// 
+        /// CENÁRIO DE TESTE: Bot NÃO pode atacar
+        /// - Cria 2 territórios: um do jogador 1 (com apenas 1 exército - NÃO pode atacar)
+        ///   e um do jogador 2 (com 2 exércitos).
+        /// - O jogador 1 não pode atacar porque precisa de pelo menos 2 exércitos para atacar.
+        /// 
+        /// Para testar o cenário onde o bot PODE atacar, altere ArmyCount do territory1 para >= 2.
         /// </summary>
         public void InitializeTestData()
         {
@@ -691,17 +713,18 @@ namespace WarVikingsBot.State
             Territories.Clear();
             ConqueredTerritoriesThisTurn.Clear();
             
-            // Criar território 1 (do jogador 1) - pode atacar
+            // Criar território 1 (do jogador 1) - NÃO pode atacar (apenas 1 exército)
+            // Para atacar, precisa de pelo menos 2 exércitos (1 de ocupação + 1 para atacar)
             var territory1 = new Territory
             {
                 Name = "Território Teste 1",
                 Type = TerritoryType.SemPorto,
                 OccupiedByPlayer = 1,
-                ArmyCount = 3, // Pode atacar (>= 2)
+                ArmyCount = 1, // NÃO pode atacar (precisa >= 2 exércitos)
                 Region = "Região Teste"
             };
             
-            // Criar território 2 (do jogador 2) - pode ser atacado
+            // Criar território 2 (do jogador 2) - pode ser atacado (mas não será porque territory1 não pode atacar)
             var territory2 = new Territory
             {
                 Name = "Território Teste 2",
@@ -719,7 +742,7 @@ namespace WarVikingsBot.State
             Territories[territory1.Name] = territory1;
             Territories[territory2.Name] = territory2;
             
-            // Definir territórios de combate para teste
+            // Definir territórios de combate para teste (mesmo que não sejam usados neste cenário)
             CurrentCombatSourceTerritory = territory1.Name;
             CurrentCombatTargetTerritory = territory2.Name;
         }

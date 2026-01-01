@@ -1233,5 +1233,5 @@ O grafo verifica primeiro se o jogador tem 3 cartas iguais. Se não tiver, verif
 
 ---
 
-**Última atualização:** 30/12/2025 - Fase 1 - Recebimento de Exércitos Implementada
+**Última atualização:** 30/12/2025 - TODOS OS TESTES CONCLUÍDOS - 49/49 testes (100%) ✅
 

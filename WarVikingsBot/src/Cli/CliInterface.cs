@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using WarVikingsBot.Crawler;
 
 namespace WarVikingsBot.Cli
@@ -41,6 +42,28 @@ namespace WarVikingsBot.Cli
                     // Exibir opções formatadas
                     DisplayOptions(options);
                     
+                    // Verificar se é a mensagem de alocação de exércitos (sempre pede confirmação)
+                    var currentMessage = _crawler.GetMessage();
+                    bool isAllocationMessage = !string.IsNullOrEmpty(currentMessage) && 
+                                               currentMessage.Contains("Aloque os exércitos");
+                    
+                    // PerformActionNode em modo bot: avançar automaticamente após 1 segundo
+                    // EXCETO se for a mensagem de alocação de exércitos
+                    if (options.Count == 1 && string.IsNullOrEmpty(options[0]) && 
+                        _crawler.IsBotMode() && !isAllocationMessage)
+                    {
+                        Thread.Sleep(1000); // Aguarda 1 segundo
+                        _crawler.Proceed(""); // Avança automaticamente
+                        continue;
+                    }
+                    
+                    // Se for mensagem de alocação ou não estiver em modo bot, aguardar input
+                    if (isAllocationMessage && _crawler.IsBotMode())
+                    {
+                        // Mostra mensagem de confirmação para alocação
+                        Console.WriteLine("\n[Pressione Enter após alocar os exércitos no tabuleiro físico]");
+                    }
+                    
                     // Aguardar input do usuário
                     var input = GetUserInput();
                     
@@ -65,9 +88,16 @@ namespace WarVikingsBot.Cli
                         // Continuar o loop para verificar novamente
                         continue;
                     }
-                    // Se está no fim, apenas aguardar Enter
-                    Console.WriteLine("\n[Pressione Enter para continuar]");
-                    Console.ReadLine();
+                    // Se está no fim, apenas aguardar Enter (ou avançar automaticamente em modo bot)
+                    if (_crawler.IsBotMode())
+                    {
+                        Thread.Sleep(1000); // Aguarda 1 segundo em modo bot
+                    }
+                    else
+                    {
+                        Console.WriteLine("\n[Pressione Enter para continuar]");
+                        Console.ReadLine();
+                    }
                 }
             }
             
@@ -89,7 +119,11 @@ namespace WarVikingsBot.Cli
             if (options.Count == 1 && string.IsNullOrEmpty(options[0]))
             {
                 // PerformActionNode - apenas Enter
-                Console.WriteLine("\n[Pressione Enter para continuar]");
+                // Em modo bot, não mostra mensagem e avança automaticamente após 2 segundos
+                if (!_crawler.IsBotMode())
+                {
+                    Console.WriteLine("\n[Pressione Enter para continuar]");
+                }
             }
             else if (options.Count == 2 && options.Contains("true") && options.Contains("false"))
             {

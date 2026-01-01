@@ -34,7 +34,7 @@ namespace WarVikingsBot
                 
                 if (useTestData)
                 {
-                    state.CurrentRound = 2; // Rodada 2 para permitir ataques
+                    state.CurrentRound = 1; // Primeira rodada (para testar comportamento na primeira rodada)
                     state.InitializeTestData();
                     Console.WriteLine("⚠️  MODO DE TESTE ATIVADO: Dados de teste inicializados.");
                     Console.WriteLine();
@@ -42,6 +42,16 @@ namespace WarVikingsBot
                 else
                 {
                     state.CurrentRound = 1; // Primeira rodada
+                }
+                
+                // Configurar modo bot e objetivo (por padrão já está ativado)
+                // state.IsBotMode = true; // Já é true por padrão
+                // state.BotObjective = BotObjective.ExpandAndFortify; // Já é o padrão
+                if (state.IsBotMode)
+                {
+                    Console.WriteLine("🤖 MODO BOT ATIVADO: IA tomará decisões automaticamente.");
+                    Console.WriteLine($"   Objetivo: {state.BotObjective}");
+                    Console.WriteLine();
                 }
                 
                 // Criar e registrar grafos
