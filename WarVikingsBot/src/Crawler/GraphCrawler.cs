@@ -427,53 +427,24 @@ namespace WarVikingsBot.Crawler
             }
             
             // ====================================================================================
-            // AVALIAÇÃO: "Você tem territórios que podem atacar?" - SEMPRE RETORNA FALSE
+            // AVALIAÇÃO: "Você tem territórios que podem atacar?"
             // ====================================================================================
-            // Como toda a fase de ataques está desabilitada, esta pergunta sempre retorna FALSE
-            // para garantir que a fase de ataques seja pulada automaticamente.
+            // Esta é a pergunta CRÍTICA que define se o bot pode atacar ou não.
+            // Para um território "poder atacar", ele precisa:
+            // 1. NÃO ser a primeira rodada (primeira rodada não tem ataques)
+            // 2. Ter pelo menos 2 exércitos (1 de ocupação + 1 para atacar)
+            // 3. Ter pelo menos 1 território inimigo adjacente que possa ser atacado
             // ====================================================================================
             if (condition.Contains("territórios que podem atacar") || condition.Contains("territorios que podem atacar"))
             {
-                // SEMPRE retorna false quando a fase de ataques está desabilitada
-                return false;
-            }
-            
-            // ====================================================================================
-            // AVALIAÇÃO: "Você tem possibilidades de deslocamento?"
-            // ====================================================================================
-            // Verifica se o jogador tem territórios contíguos com mais de 1 exército que podem
-            // ser deslocados. Retorna true se houver possibilidades, false caso contrário.
-            // ====================================================================================
-            if (condition.Contains("possibilidades de deslocamento") || condition.Contains("possibilidade de deslocamento"))
-            {
-                // Verifica se há territórios que podem deslocar (territórios com > 1 exército)
-                // O método GetMovementSourceTerritories já verifica se há destinos disponíveis
-                var movementSources = _state.GetMovementSourceTerritories(playerId);
-                return movementSources.Count > 0; // Retorna true se houver pelo menos uma possibilidade de deslocamento
-            }
-            
-            /* ====================================================================================
-             * AVALIAÇÃO: "Você tem territórios que podem atacar?" - CÓDIGO ORIGINAL DESABILITADO
-             * ====================================================================================
-             * TODO O CÓDIGO DE AVALIAÇÃO DE TERRITÓRIOS QUE PODEM ATACAR FOI COMENTADO (DESABILITADO)
-             * 
-             * Esta seção continha:
-             * - Validação de primeira rodada
-             * - Verificação de territórios com >= 2 exércitos
-             * - Verificação de alvos adjacentes inimigos
-             * - Definição da flag _canAttackTerritories
-             * 
-             * Com este código desabilitado, a pergunta não será respondida automaticamente.
-             * ==================================================================================== */
-            /* COMENTADO: Avaliação de territórios que podem atacar (código original)
-            if (condition.Contains("territórios que podem atacar") || condition.Contains("territorios que podem atacar"))
-            {
+                // VALIDAÇÃO 1: Primeira rodada não permite ataques
                 if (_state.IsFirstRound)
                 {
                     _canAttackTerritories = false;
                     return false;
                 }
                 
+                // VALIDAÇÃO 2: Verifica se tem territórios com pelo menos 2 exércitos
                 var sources = _state.GetAttackSourceTerritories(playerId);
                 if (sources.Count == 0)
                 {
@@ -481,6 +452,7 @@ namespace WarVikingsBot.Crawler
                     return false;
                 }
                 
+                // VALIDAÇÃO 3: Verifica se há alvos disponíveis a partir desses territórios
                 bool hasAnyTarget = false;
                 foreach (var source in sources)
                 {
@@ -498,26 +470,32 @@ namespace WarVikingsBot.Crawler
                     return false;
                 }
                 
+                // Se chegou aqui, passou em TODAS as validações
                 _canAttackTerritories = true;
                 return true;
             }
-            */
             
-            /* ====================================================================================
-             * DECISÕES DO BOT - CÓDIGO DE ATAQUE DESABILITADO
-             * ====================================================================================
-             * TODO O CÓDIGO RELACIONADO A DECISÕES DE ATAQUE DO BOT FOI COMENTADO (DESABILITADO)
-             * 
-             * Esta seção continha:
-             * - Avaliação de "Você quer realizar um ataque?"
-             * - Validações de territórios que podem atacar
-             * - Consulta à estratégia do bot para decidir se ataca
-             * 
-             * Com este código desabilitado, o bot NÃO tomará decisões de ataque.
-             * ==================================================================================== */
+            // ====================================================================================
+            // AVALIAÇÃO: "Você tem possibilidades de deslocamento?"
+            // ====================================================================================
+            // Verifica se o jogador tem territórios contíguos com mais de 1 exército que podem
+            // ser deslocados. Retorna true se houver possibilidades, false caso contrário.
+            // ====================================================================================
+            if (condition.Contains("possibilidades de deslocamento") || condition.Contains("possibilidade de deslocamento"))
+            {
+                // Verifica se há territórios que podem deslocar (territórios com > 1 exército)
+                // O método GetMovementSourceTerritories já verifica se há destinos disponíveis
+                var movementSources = _state.GetMovementSourceTerritories(playerId);
+                return movementSources.Count > 0; // Retorna true se houver pelo menos uma possibilidade de deslocamento
+            }
             
-            // Decisões do bot (se estiver em modo bot) - ATACAR DESABILITADO
-            /* COMENTADO: Toda a lógica de decisão de ataque do bot
+            // ====================================================================================
+            // AVALIAÇÃO: "Você quer realizar um ataque?"
+            // ====================================================================================
+            // Esta pergunta só deve ser respondida se o bot TEM territórios que podem atacar.
+            // Se _canAttackTerritories == false, esta pergunta nunca deveria ser alcançada,
+            // mas adicionamos validações extras aqui como camada de segurança.
+            // ====================================================================================
             if (_state.IsBotMode && _botStrategy != null)
             {
                 var nodeId = node.Id?.ToLower() ?? "";
@@ -529,11 +507,13 @@ namespace WarVikingsBot.Crawler
                 
                 if (isAttackQuestion)
                 {
+                    // VALIDAÇÃO CRÍTICA #1: Verificação prévia da flag
                     if (_canAttackTerritories.HasValue && _canAttackTerritories.Value == false)
                     {
                         return false;
                     }
                     
+                    // VALIDAÇÃO CRÍTICA #2: Verificação tardia (caso a primeira pergunta não tenha sido feita)
                     if (!_canAttackTerritories.HasValue)
                     {
                         var attackSources = _state.GetAttackSourceTerritories(playerId);
@@ -553,11 +533,13 @@ namespace WarVikingsBot.Crawler
                         _canAttackTerritories = true;
                     }
                     
+                    // VALIDAÇÃO CRÍTICA #3: Verificação dupla da flag
                     if (_canAttackTerritories.HasValue && _canAttackTerritories.Value == false)
                     {
                         return false;
                     }
                     
+                    // VALIDAÇÃO CRÍTICA #4: Última verificação antes de permitir estratégia
                     var finalCheckSources = _state.GetAttackSourceTerritories(playerId);
                     var finalCheckTargets = _state.GetAttackableTerritories(playerId);
                     if (finalCheckSources.Count == 0 || finalCheckTargets.Count == 0)
@@ -566,6 +548,7 @@ namespace WarVikingsBot.Crawler
                         return false;
                     }
                     
+                    // CONSULTA À ESTRATÉGIA DO BOT
                     try
                     {
                         return _botStrategy.ShouldAttack();
@@ -577,7 +560,6 @@ namespace WarVikingsBot.Crawler
                     }
                 }
             }
-            */
             
             // Se não for uma condição automática, retorna null para aguardar interação
             return null;
@@ -591,7 +573,6 @@ namespace WarVikingsBot.Crawler
             
             switch (actionId)
             {
-                /* COMENTADO: Ações de combate desabilitadas
                 case "resolve_combat":
                     if (!string.IsNullOrEmpty(state.CurrentCombatSourceTerritory) && 
                         !string.IsNullOrEmpty(state.CurrentCombatTargetTerritory))
@@ -617,9 +598,7 @@ namespace WarVikingsBot.Crawler
                         );
                     }
                     break;
-                */
                     
-                /* COMENTADO: Movimento de exércitos após conquista desabilitado
                 case "move_armies_after_conquest":
                 case "move_armies":
                     if (!string.IsNullOrEmpty(state.CurrentCombatSourceTerritory) &&
@@ -644,9 +623,7 @@ namespace WarVikingsBot.Crawler
                         );
                     }
                     break;
-                */
                     
-                /* COMENTADO: Seleção de territórios de combate desabilitada
                 case "set_combat_source":
                     // Define o território de origem do combate
                     if (state.IsBotMode && _botStrategy != null)
@@ -691,7 +668,6 @@ namespace WarVikingsBot.Crawler
                         }
                     }
                     break;
-                */
                     
                 case "set_movement_source":
                     // Define o território de origem do deslocamento

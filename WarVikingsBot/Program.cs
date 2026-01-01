@@ -34,9 +34,10 @@ namespace WarVikingsBot
                 
                 if (useTestData)
                 {
-                    state.CurrentRound = 1; // Primeira rodada (para testar comportamento na primeira rodada)
+                    state.CurrentRound = 2; // Rodada 2 (permite ataques - primeira rodada não permite)
                     state.InitializeTestData();
                     Console.WriteLine("⚠️  MODO DE TESTE ATIVADO: Dados de teste inicializados.");
+                    Console.WriteLine("   Cenário: Jogador 1 tem 3 exércitos, Jogador 2 tem 2 exércitos (adjacentes)");
                     Console.WriteLine();
                 }
                 else

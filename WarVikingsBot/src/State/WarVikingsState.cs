@@ -700,12 +700,10 @@ namespace WarVikingsBot.State
         /// <summary>
         /// Inicializa dados de teste para permitir testar o sistema de combate.
         /// 
-        /// CENÁRIO DE TESTE: Bot NÃO pode atacar
-        /// - Cria 2 territórios: um do jogador 1 (com apenas 1 exército - NÃO pode atacar)
-        ///   e um do jogador 2 (com 2 exércitos).
-        /// - O jogador 1 não pode atacar porque precisa de pelo menos 2 exércitos para atacar.
-        /// 
-        /// Para testar o cenário onde o bot PODE atacar, altere ArmyCount do territory1 para >= 2.
+        /// CENÁRIO DE TESTE: Bot PODE atacar
+        /// - Cria 2 territórios: um do jogador 1 (com 3 exércitos - PODE atacar)
+        ///   e um do jogador 2 (com 2 exércitos - pode ser atacado).
+        /// - O jogador 1 pode atacar porque tem >= 2 exércitos e há um alvo adjacente.
         /// </summary>
         public void InitializeTestData()
         {
@@ -713,18 +711,18 @@ namespace WarVikingsBot.State
             Territories.Clear();
             ConqueredTerritoriesThisTurn.Clear();
             
-            // Criar território 1 (do jogador 1) - NÃO pode atacar (apenas 1 exército)
+            // Criar território 1 (do jogador 1) - PODE atacar (3 exércitos)
             // Para atacar, precisa de pelo menos 2 exércitos (1 de ocupação + 1 para atacar)
             var territory1 = new Territory
             {
                 Name = "Território Teste 1",
                 Type = TerritoryType.SemPorto,
                 OccupiedByPlayer = 1,
-                ArmyCount = 1, // NÃO pode atacar (precisa >= 2 exércitos)
+                ArmyCount = 3, // PODE atacar (>= 2 exércitos)
                 Region = "Região Teste"
             };
             
-            // Criar território 2 (do jogador 2) - pode ser atacado (mas não será porque territory1 não pode atacar)
+            // Criar território 2 (do jogador 2) - pode ser atacado
             var territory2 = new Territory
             {
                 Name = "Território Teste 2",
